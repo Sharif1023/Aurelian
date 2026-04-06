@@ -1,10 +1,12 @@
-import { ChevronLeft, CheckCircle2, CreditCard, MapPin, Loader2, ChevronDown, ChevronUp, ShoppingBag, Smartphone, Wallet, Banknote } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, CreditCard, MapPin, Loader2, ChevronDown, ChevronUp, ShoppingBag, Smartphone, Wallet, Banknote, Download, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../../context/CartContext';
 import { useProducts } from '../../context/ProductContext';
 import { cn } from '@/src/lib/utils';
+import Invoice from '../../components/Invoice';
+import { Order } from '../../types';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ export default function Checkout() {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'Card' | 'bKash' | 'Nagad'>('COD');
   const [orderNumber, setOrderNumber] = useState('');
+  const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const [showInvoice, setShowInvoice] = useState(false);
   const [shippingArea, setShippingArea] = useState<'Chittagong' | 'Outside'>('Chittagong');
   
   const [couponCode, setCouponCode] = useState('');
@@ -93,10 +97,11 @@ export default function Checkout() {
       });
 
       setOrderNumber(newOrder.orderNumber);
+      setCompletedOrder(newOrder);
       setIsProcessing(false);
       setIsSuccess(true);
       clearCart();
-      setTimeout(() => navigate('/'), 5000);
+      // Removed automatic redirect to allow invoice download
     } catch (error) {
       setIsProcessing(false);
       alert('Failed to place order. Please try again.');
@@ -113,13 +118,42 @@ export default function Checkout() {
         >
           <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12" />
         </motion.div>
-        <h1 className="font-headline text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">Order Confirmed</h1>
-        <p className="text-on-surface-variant max-w-md mb-12 text-sm sm:text-base">
-          Thank you for your purchase. Your order #{orderNumber} has been placed successfully. We will contact you soon.
-        </p>
-        <Link to="/" className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-full font-bold uppercase tracking-[0.2em] shadow-lg hover:opacity-90 transition-opacity">
-          Return to Home
-        </Link>
+        
+        <div className="space-y-2 mb-8">
+          <h1 className="font-headline text-3xl sm:text-4xl font-extrabold tracking-tight">Order Confirmed</h1>
+          <p className="text-on-surface-variant text-sm sm:text-base">Thank you for your purchase. Your order has been placed successfully.</p>
+        </div>
+
+        <div className="bg-surface-low p-8 sm:p-12 rounded-[40px] border border-outline-variant/10 mb-12 w-full max-w-lg">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-4">Your Tracking ID</p>
+          <h2 className="text-4xl sm:text-5xl font-headline font-black text-primary tracking-tighter mb-4">
+            {orderNumber}
+          </h2>
+          <p className="text-xs text-on-surface-variant/60">Please save this ID to track your luxury shipment.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg">
+          <button 
+            onClick={() => setShowInvoice(true)}
+            className="flex-1 px-8 py-5 bg-white border border-outline-variant/20 text-primary rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-surface-low transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            View Invoice
+          </button>
+          <Link to="/" className="flex-1 px-8 py-5 bg-primary text-white rounded-full font-bold uppercase tracking-widest text-xs shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center">
+            Return to Home
+          </Link>
+        </div>
+
+        <AnimatePresence>
+          {showInvoice && completedOrder && (
+            <Invoice 
+              order={completedOrder} 
+              brandName={storeSettings.brandSettings.name} 
+              onClose={() => setShowInvoice(false)} 
+            />
+          )}
+        </AnimatePresence>
       </main>
     );
   }

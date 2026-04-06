@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Search, Package, Truck, CheckCircle, Clock, Calendar, MapPin, Info } from 'lucide-react';
+import { Search, Package, Truck, CheckCircle, Clock, Calendar, MapPin, Info, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../../context/ProductContext';
 import { cn } from '@/src/lib/utils';
+import Invoice from '../../components/Invoice';
 
 export default function TrackOrder() {
   const { orders, storeSettings } = useProducts();
   const [orderNumber, setOrderNumber] = useState('');
   const [searchedOrder, setSearchedOrder] = useState<any>(null);
   const [error, setError] = useState('');
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,15 +96,27 @@ export default function TrackOrder() {
             >
               {/* Status Timeline */}
               <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-outline-variant/10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
-                  <div>
-                    <h2 className="text-xl font-headline font-bold uppercase tracking-tight">Order {searchedOrder.orderNumber}</h2>
-                    <p className="text-xs text-on-surface-variant mt-1">Placed on {new Date(searchedOrder.createdAt).toLocaleDateString()}</p>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">Tracking ID</p>
+                    <h2 className="text-3xl sm:text-4xl font-headline font-black text-primary tracking-tighter uppercase">
+                      {searchedOrder.orderNumber}
+                    </h2>
+                    <p className="text-xs text-on-surface-variant">Placed on {new Date(searchedOrder.createdAt).toLocaleDateString()}</p>
                   </div>
-                  <div className="px-4 py-2 bg-primary/5 rounded-full border border-primary/10">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                      Status: {searchedOrder.status}
-                    </span>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <button 
+                      onClick={() => setShowInvoice(true)}
+                      className="px-6 py-3 bg-surface-low hover:bg-surface-medium text-primary rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Invoice
+                    </button>
+                    <div className="px-6 py-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-center">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        {searchedOrder.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -198,6 +212,15 @@ export default function TrackOrder() {
           )}
         </AnimatePresence>
 
+        <AnimatePresence>
+          {showInvoice && searchedOrder && (
+            <Invoice 
+              order={searchedOrder} 
+              brandName={storeSettings.brandSettings.name} 
+              onClose={() => setShowInvoice(false)} 
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

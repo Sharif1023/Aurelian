@@ -1,20 +1,28 @@
 import { AdminLayout } from './AdminDashboard';
-import { Search, Filter, Eye, Download, MoreHorizontal, Calendar, X, Check, Truck, XCircle, Clock, Trash2 } from 'lucide-react';
+import { Search, Filter, Eye, Download, MoreHorizontal, Calendar, X, Check, Truck, XCircle, Clock, Trash2, FileText, ChevronDown } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts } from '../../context/ProductContext';
 import { Order } from '../../types';
+import Invoice from '../../components/Invoice';
 
 export default function AdminOrders() {
-  const { orders, updateOrderStatus, deleteOrder } = useProducts();
+  const { orders, updateOrderStatus, deleteOrder, storeSettings, products } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Orders');
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showInvoiceOrder, setShowInvoiceOrder] = useState<Order | null>(null);
+  const [autoDownloadOrder, setAutoDownloadOrder] = useState<Order | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const itemsPerPage = 10;
+
+  // Get unique categories from products to use in filter
+  const categories = ['All Categories', ...new Set(products.map(p => p.category))];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -39,7 +47,13 @@ export default function AdminOrders() {
     const matchesDate = (!dateRange.start || orderDate >= dateRange.start) &&
                        (!dateRange.end || orderDate <= dateRange.end);
     
-    return matchesSearch && matchesTab && matchesDate;
+    const matchesCategory = selectedCategory === 'All Categories' || 
+      order.items.some(item => {
+        const product = products.find(p => p.id === item.productId);
+        return product?.category === selectedCategory;
+      });
+    
+    return matchesSearch && matchesTab && matchesDate && matchesCategory;
   });
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -123,18 +137,38 @@ export default function AdminOrders() {
       {/* Orders Table / Mobile List */}
       <div className="bg-white rounded-3xl shadow-sm border border-outline-variant/10">
         <div className="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40" />
-            <input
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full bg-surface-low border-none rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Search by Order #, Customer, or Email..."
-            />
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-grow">
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40" />
+              <input
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-surface-low border-none rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Search Order #, Customer..."
+              />
+            </div>
+            
+            {/* Category Filter */}
+            <div className="relative w-full md:w-48">
+              <select
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer font-bold uppercase tracking-widest text-[10px]"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40 pointer-events-none" />
+            </div>
           </div>
+
           <div className="flex gap-4 w-full md:w-auto">
             <div className="flex items-center gap-2 bg-white border border-outline-variant/20 rounded-xl px-4 py-2">
               <Calendar className="w-4 h-4 text-on-surface-variant" />
@@ -202,8 +236,23 @@ export default function AdminOrders() {
                   <td className="px-8 py-6 text-right">
                     <div className="flex justify-end gap-2">
                       <button 
+                        onClick={() => setAutoDownloadOrder(order)}
+                        className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary"
+                        title="Quick PDF Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => setShowInvoiceOrder(order)}
+                        className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary"
+                        title="View Invoice"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </button>
+                      <button 
                         onClick={() => setSelectedOrder(order)}
                         className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary"
+                        title="View Details"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -301,6 +350,20 @@ export default function AdminOrders() {
                 <div className="text-right">
                   <p className="font-headline font-bold text-sm">৳{order.total.toFixed(2)}</p>
                   <div className="flex gap-2 mt-2">
+                    <button 
+                      onClick={() => setAutoDownloadOrder(order)}
+                      className="p-2 bg-surface-low rounded-lg text-on-surface-variant"
+                      title="Quick PDF Download"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => setShowInvoiceOrder(order)}
+                      className="p-2 bg-surface-low rounded-lg text-on-surface-variant"
+                      title="View Invoice"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
                     <button 
                       onClick={() => setSelectedOrder(order)}
                       className="p-2 bg-surface-low rounded-lg text-on-surface-variant"
@@ -517,7 +580,11 @@ export default function AdminOrders() {
                     >
                       Close
                     </button>
-                    <button className="flex-1 sm:flex-none px-6 py-3 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform">
+                    <button 
+                      onClick={() => setShowInvoiceOrder(selectedOrder)}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                    >
+                      <FileText className="w-4 h-4" />
                       Print Invoice
                     </button>
                   </div>
@@ -525,6 +592,29 @@ export default function AdminOrders() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Invoice Modal */}
+      <AnimatePresence>
+        {showInvoiceOrder && (
+          <Invoice 
+            order={showInvoiceOrder} 
+            brandName={storeSettings.brandSettings.name} 
+            onClose={() => setShowInvoiceOrder(null)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Auto-Download Invoice (Hidden/Modal) */}
+      <AnimatePresence>
+        {autoDownloadOrder && (
+          <Invoice 
+            order={autoDownloadOrder} 
+            brandName={storeSettings.brandSettings.name} 
+            onClose={() => setAutoDownloadOrder(null)}
+            autoDownload={true}
+          />
         )}
       </AnimatePresence>
     </AdminLayout>

@@ -14,7 +14,7 @@ import Checkout from './screens/public/Checkout';
 import Wishlist from './screens/public/Wishlist';
 import SignIn from './screens/public/SignIn';
 import TrackOrder from './screens/public/TrackOrder';
-import Contact from './screens/public/Contact';
+import Contact from './screens/public/contact';
 import AdminDashboard from './screens/admin/AdminDashboard';
 import AdminProducts from './screens/admin/AdminProducts';
 import AdminOrders from './screens/admin/AdminOrders';

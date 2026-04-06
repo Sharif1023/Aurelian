@@ -13,9 +13,9 @@ export default function ProductDetail() {
   const { products, wishlist, toggleWishlist, storeSettings } = useProducts();
   const { addToCart } = useCart();
   const product = products.find((p) => p.id === id) || products[0];
-  
+
   const isLiked = wishlist.includes(product.id);
-  
+
   const availableSizes = product.sizes || [
     { size: 'S', isAvailable: true, quantity: 0 },
     { size: 'M', isAvailable: true, quantity: 0 },
@@ -66,7 +66,7 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
         {/* Gallery */}
         <div className="lg:col-span-4 space-y-4 lg:max-w-sm mx-auto w-full">
-          <div 
+          <div
             className="relative aspect-[4/5] overflow-hidden rounded-xl bg-surface-low cursor-zoom-in shadow-sm"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
@@ -87,7 +87,7 @@ export default function ProductDetail() {
               </span>
             </div>
           </div>
-          
+
           {/* Thumbnails - Smaller and updates main image */}
           <div className="flex gap-3 overflow-x-auto no-scrollbar py-2">
             {[product.image, ...(product.extraImages || [])].map((img, idx) => (
@@ -149,7 +149,7 @@ export default function ProductDetail() {
                       "h-12 rounded-lg text-sm font-medium transition-all border relative overflow-hidden",
                       selectedSize === s.size
                         ? "border-primary bg-primary text-white font-bold"
-                        : s.isAvailable 
+                        : s.isAvailable
                           ? "border-outline-variant hover:border-primary"
                           : "border-outline-variant/10 bg-surface-low text-on-surface-variant/30 cursor-not-allowed"
                     )}
@@ -168,7 +168,7 @@ export default function ProductDetail() {
 
           {/* CTAs */}
           <div className="space-y-4">
-            <button 
+            <button
               onClick={handleAddToCart}
               disabled={isAdding}
               className={cn(
@@ -180,7 +180,7 @@ export default function ProductDetail() {
               {isAdding ? <Check className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
             </button>
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={handleBuyNow}
                 disabled={isBuying}
                 className={cn(
@@ -190,7 +190,7 @@ export default function ProductDetail() {
               >
                 {isBuying ? "Processing..." : "Buy Now"}
               </button>
-              <button 
+              <button
                 onClick={() => toggleWishlist(product.id)}
                 className={cn(
                   "w-16 h-16 border rounded-full flex items-center justify-center transition-colors",
@@ -206,10 +206,10 @@ export default function ProductDetail() {
           <div className="mt-8 border-t border-outline-variant/20">
             {[
               { title: 'Product Details', content: product.productDetails || 'Premium quality materials. Designed for comfort and durability. Ethical manufacturing process.' },
-              ...(product.sizeChart ? [{ 
-                title: product.sizeChart.title || 'Size Chart', 
+              ...(product.sizeChart ? [{
+                title: product.sizeChart.title || 'Size Chart',
                 content: '',
-                isSizeChart: true 
+                isSizeChart: true
               }] : []),
               { title: 'Shipping & Returns', content: storeSettings.brandSettings.shippingReturns || 'Free shipping on orders over ৳100. Easy 30-day returns.' },
               { title: 'Specifications', content: storeSettings.brandSettings.specifications || 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.' },
@@ -225,7 +225,7 @@ export default function ProductDetail() {
                       <table className="w-full text-left border-collapse min-w-[400px]">
                         <thead>
                           <tr className="bg-surface-low">
-                            {product.sizeChart.columns.map((col, i) => (
+                            {product.sizeChart!.columns?.map((col, i) => (
                               <th key={i} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">
                                 {col}
                               </th>
@@ -233,9 +233,9 @@ export default function ProductDetail() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/5">
-                          {product.sizeChart.rows.map((row, rowIndex) => (
+                          {product.sizeChart!.rows?.map((row, rowIndex) => (
                             <tr key={rowIndex} className="hover:bg-surface-low/30 transition-colors">
-                              {product.sizeChart.columns.map((col, colIndex) => (
+                              {product.sizeChart!.columns?.map((col, colIndex) => (
                                 <td key={colIndex} className="px-4 py-3 text-xs font-medium text-on-surface border-r border-outline-variant/5 last:border-r-0">
                                   {row[col]}
                                 </td>

@@ -140,7 +140,12 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     "brandSettings": {
         "name": "AURELIAN",
         "fontFamily": "font-display",
-        "color": "#000000"
+        "color": "#000000",
+        "email": "contact@aurelian.com",
+        "address": "123 Luxury Lane, Architectural District, Chittagong, Bangladesh",
+        "contactPhone": "+880 1700-000000",
+        "shippingReturns": "Free shipping on orders over ৳100. Easy 30-day returns.",
+        "specifications": "Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean."
     }
 }'),
 ('home_settings', '{

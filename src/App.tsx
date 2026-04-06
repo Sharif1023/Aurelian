@@ -14,6 +14,7 @@ import Checkout from './screens/public/Checkout';
 import Wishlist from './screens/public/Wishlist';
 import SignIn from './screens/public/SignIn';
 import TrackOrder from './screens/public/TrackOrder';
+import Contact from './screens/public/Contact';
 import AdminDashboard from './screens/admin/AdminDashboard';
 import AdminProducts from './screens/admin/AdminProducts';
 import AdminOrders from './screens/admin/AdminOrders';
@@ -57,6 +58,7 @@ function AppContent() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/track-order" element={<TrackOrder />} />
+          <Route path="/contact" element={<Contact />} />
           
           {/* Admin Routes with Guard */}
           <Route path={`/${adminPath}/*`} element={

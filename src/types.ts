@@ -17,6 +17,7 @@ export interface Product {
   sizes?: { size: string; isAvailable: boolean; quantity: number }[];
   colors?: { name: string; hex: string }[];
   extraImages?: string[];
+  createdAt: string;
   sizeChart?: {
     title: string;
     columns: string[];
@@ -77,6 +78,7 @@ export const PRODUCTS: Product[] = [
     reviews: 124,
     stock: 42,
     status: 'Active',
+    createdAt: '2024-01-01T00:00:00Z',
     sizes: [
       { size: 'S', isAvailable: true, quantity: 10 },
       { size: 'M', isAvailable: true, quantity: 15 },
@@ -106,6 +108,7 @@ export const PRODUCTS: Product[] = [
     reviews: 89,
     stock: 15,
     status: 'Active',
+    createdAt: '2024-01-02T00:00:00Z',
     sizes: [
       { size: 'S', isAvailable: true, quantity: 5 },
       { size: 'M', isAvailable: true, quantity: 5 },
@@ -133,6 +136,7 @@ export const PRODUCTS: Product[] = [
     reviews: 56,
     stock: 28,
     status: 'Active',
+    createdAt: '2024-01-03T00:00:00Z',
     sizes: [
       { size: '30', isAvailable: true, quantity: 7 },
       { size: '32', isAvailable: true, quantity: 7 },
@@ -161,6 +165,7 @@ export const PRODUCTS: Product[] = [
     reviews: 42,
     stock: 8,
     status: 'Active',
+    createdAt: '2024-01-04T00:00:00Z',
     sizes: [
       { size: '40', isAvailable: true, quantity: 2 },
       { size: '41', isAvailable: true, quantity: 2 },
@@ -188,6 +193,7 @@ export const PRODUCTS: Product[] = [
     reviews: 210,
     stock: 12,
     status: 'Active',
+    createdAt: '2024-01-05T00:00:00Z',
     sizes: [
       { size: 'One Size', isAvailable: true, quantity: 12 }
     ],
@@ -212,6 +218,7 @@ export const PRODUCTS: Product[] = [
     reviews: 78,
     stock: 24,
     status: 'Active',
+    createdAt: '2024-01-06T00:00:00Z',
     sizes: [
       { size: 'S', isAvailable: true, quantity: 6 },
       { size: 'M', isAvailable: true, quantity: 6 },
@@ -240,6 +247,7 @@ export const PRODUCTS: Product[] = [
     reviews: 45,
     stock: 20,
     status: 'Active',
+    createdAt: '2024-01-07T00:00:00Z',
     sizes: [
       { size: 'S', isAvailable: true, quantity: 5 },
       { size: 'M', isAvailable: true, quantity: 5 },

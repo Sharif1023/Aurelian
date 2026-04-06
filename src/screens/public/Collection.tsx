@@ -15,6 +15,7 @@ export default function Collection() {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [activeSubCategory, setActiveSubCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('Featured');
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   const displayCategory = hoveredCategory || activeCategory;
@@ -51,14 +52,25 @@ export default function Collection() {
   }, [hoveredCategory, products]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    let result = products.filter(product => {
       const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
       const matchesSubCategory = activeSubCategory === 'All' || product.subCategory === activeSubCategory;
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            product.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSubCategory && matchesSearch;
     });
-  }, [activeCategory, activeSubCategory, searchQuery, products]);
+
+    // Apply Sorting
+    if (sortBy === 'Price: Low to High') {
+      result = [...result].sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'Price: High to Low') {
+      result = [...result].sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'Newest') {
+      result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return result;
+  }, [activeCategory, activeSubCategory, searchQuery, sortBy, products]);
 
   const { addToCart } = useCart();
 
@@ -163,11 +175,15 @@ export default function Collection() {
         </button>
         <div className="flex items-center gap-2 bg-surface-lowest px-6 py-2.5 rounded-full shadow-sm">
           <span className="text-sm font-medium uppercase tracking-wider text-on-surface-variant/60">Sort:</span>
-          <select className="bg-transparent border-none p-0 text-sm font-semibold focus:ring-0 cursor-pointer outline-none">
-            <option>Featured</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Newest</option>
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-transparent border-none p-0 text-sm font-semibold focus:ring-0 cursor-pointer outline-none"
+          >
+            <option value="Featured">Featured</option>
+            <option value="Price: Low to High">Price: Low to High</option>
+            <option value="Price: High to Low">Price: High to Low</option>
+            <option value="Newest">Newest</option>
           </select>
         </div>
       </section>

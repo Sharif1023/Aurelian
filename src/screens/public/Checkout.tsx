@@ -1,6 +1,6 @@
 import { ChevronLeft, CheckCircle2, CreditCard, MapPin, Loader2, ChevronDown, ChevronUp, ShoppingBag, Smartphone, Wallet, Banknote, Download, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../../context/CartContext';
 import { useProducts } from '../../context/ProductContext';
@@ -20,6 +20,12 @@ export default function Checkout() {
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [showInvoice, setShowInvoice] = useState(false);
   const [shippingArea, setShippingArea] = useState<'Chittagong' | 'Outside'>('Chittagong');
+
+  useEffect(() => {
+    if (isSuccess) {
+      window.scrollTo(0, 0);
+    }
+  }, [isSuccess]);
   
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);

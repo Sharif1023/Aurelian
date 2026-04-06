@@ -216,7 +216,7 @@ export function Footer() {
             <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest">Shipping & Returns</a>
             <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest">Privacy Policy</a>
             <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest">Terms of Service</a>
-            <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest">Contact Us</a>
+            <Link to="/contact" className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest">Contact Us</Link>
           </nav>
         </div>
       </div>

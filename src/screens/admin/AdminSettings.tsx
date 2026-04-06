@@ -572,6 +572,66 @@ export default function AdminSettings() {
                         </div>
 
                         <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Support Email</label>
+                          <input 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                            value={storeSettings.brandSettings?.email || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              brandSettings: { ...storeSettings.brandSettings, email: e.target.value } 
+                            })}
+                            placeholder="e.g. contact@aurelian.com"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Contact Phone</label>
+                          <input 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                            value={storeSettings.brandSettings?.contactPhone || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              brandSettings: { ...storeSettings.brandSettings, contactPhone: e.target.value } 
+                            })}
+                            placeholder="e.g. +880 1700-000000"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Store Address</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
+                            value={storeSettings.brandSettings?.address || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              brandSettings: { ...storeSettings.brandSettings, address: e.target.value } 
+                            })}
+                            placeholder="e.g. 123 Luxury Lane, Chittagong"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Shipping & Returns</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
+                            value={storeSettings.brandSettings?.shippingReturns || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              brandSettings: { ...storeSettings.brandSettings, shippingReturns: e.target.value } 
+                            })}
+                            placeholder="e.g. Free shipping on orders over ৳100..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Specifications</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
+                            value={storeSettings.brandSettings?.specifications || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              brandSettings: { ...storeSettings.brandSettings, specifications: e.target.value } 
+                            })}
+                            placeholder="e.g. Material: 100% Cotton..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Font</label>
                           <select 
                             className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all appearance-none"

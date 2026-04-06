@@ -10,7 +10,7 @@ import Markdown from 'react-markdown';
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, wishlist, toggleWishlist } = useProducts();
+  const { products, wishlist, toggleWishlist, storeSettings } = useProducts();
   const { addToCart } = useCart();
   const product = products.find((p) => p.id === id) || products[0];
   
@@ -211,8 +211,8 @@ export default function ProductDetail() {
                 content: '',
                 isSizeChart: true 
               }] : []),
-              { title: 'Shipping & Returns', content: 'Free shipping on orders over ৳100. Easy 30-day returns.' },
-              { title: 'Specifications', content: 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.' },
+              { title: 'Shipping & Returns', content: storeSettings.brandSettings.shippingReturns || 'Free shipping on orders over ৳100. Easy 30-day returns.' },
+              { title: 'Specifications', content: storeSettings.brandSettings.specifications || 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.' },
             ].map((item: any) => (
               <details key={item.title} className="group border-b border-outline-variant/20">
                 <summary className="flex justify-between items-center py-5 cursor-pointer list-none">
@@ -254,48 +254,6 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-
-      {/* Reviews - Hidden on Mobile */}
-      <section className="hidden lg:block mt-32 pt-20 border-t border-outline-variant/20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-4">
-            <h2 className="text-3xl font-headline font-bold mb-6">Customer Reviews</h2>
-            <div className="flex items-center gap-4 mb-2">
-              <div className="flex text-secondary">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-current" />
-                ))}
-              </div>
-              <span className="text-lg font-bold">4.9 / 5.0</span>
-            </div>
-            <p className="text-sm text-on-surface-variant mb-8">Based on 124 curated reviews</p>
-            <button className="px-8 py-4 border border-primary rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all">
-              Write a Review
-            </button>
-          </div>
-          <div className="lg:col-span-8 space-y-12">
-            {[
-              { name: 'Evelyn V.', date: 'Oct 24, 2023', text: 'The quality is unlike anything I’ve owned before. Truly an investment piece.' },
-              { name: 'Marcus T.', date: 'Sep 12, 2023', text: 'Exquisite tailoring. Fits perfectly and feels amazing.' },
-            ].map((rev) => (
-              <div key={rev.name} className="pb-8 border-b border-outline-variant/10">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="font-bold text-sm mb-1 uppercase tracking-tight">{rev.name}</h4>
-                    <div className="flex text-secondary">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-on-surface-variant uppercase tracking-widest">{rev.date}</span>
-                </div>
-                <p className="text-on-surface-variant leading-relaxed">{rev.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Recommendations - 2 columns on mobile */}
       <section className="mt-20 md:mt-32">

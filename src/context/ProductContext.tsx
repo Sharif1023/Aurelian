@@ -20,6 +20,11 @@ export interface StoreSettings {
     name: string;
     fontFamily: 'font-display' | 'font-headline' | 'font-sans';
     color: string;
+    email?: string;
+    address?: string;
+    contactPhone?: string;
+    shippingReturns?: string;
+    specifications?: string;
   };
 }
 
@@ -51,7 +56,7 @@ export interface HomeSettings {
 
 interface ProductContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviews'>) => void;
+  addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviews' | 'createdAt'>) => void;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   categories: string[];
@@ -115,7 +120,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       brandSettings: {
         name: 'AURELIAN',
         fontFamily: 'font-display',
-        color: '#000000'
+        color: '#000000',
+        email: 'contact@aurelian.com',
+        address: '123 Luxury Lane, Architectural District, Chittagong, Bangladesh',
+        contactPhone: '+880 1700-000000',
+        shippingReturns: 'Free shipping on orders over ৳100. Easy 30-day returns.',
+        specifications: 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.'
       }
     };
   });
@@ -177,7 +187,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       brandSettings: parsed.brandSettings || {
         name: 'AURELIAN',
         fontFamily: 'font-display',
-        color: '#000000'
+        color: '#000000',
+        email: 'contact@aurelian.com',
+        address: '123 Luxury Lane, Architectural District, Chittagong, Bangladesh',
+        contactPhone: '+880 1700-000000',
+        shippingReturns: 'Free shipping on orders over ৳100. Easy 30-day returns.',
+        specifications: 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.'
       }
     };
   });
@@ -200,12 +215,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const categories = Array.from(new Set(products.map(p => p.category)));
 
-  const addProduct = (newProduct: Omit<Product, 'id' | 'rating' | 'reviews'>) => {
+  const addProduct = (newProduct: Omit<Product, 'id' | 'rating' | 'reviews' | 'createdAt'>) => {
     const product: Product = {
       ...newProduct,
       id: Math.random().toString(36).substr(2, 9),
       rating: 5,
       reviews: 0,
+      createdAt: new Date().toISOString(),
     };
     setProducts(prev => [product, ...prev]);
 

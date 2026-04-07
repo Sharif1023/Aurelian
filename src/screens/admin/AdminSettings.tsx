@@ -1,5 +1,5 @@
 import { AdminLayout } from './AdminDashboard';
-import { Settings, Bell, Shield, Globe, CreditCard, User, Save, Layout, Plus, Trash2, Upload, Image as ImageIcon, Check, Key as KeyIcon, Lock as LockIcon } from 'lucide-react';
+import { Settings, Bell, Shield, Globe, CreditCard, User, Save, Layout, Plus, Trash2, Upload, Image as ImageIcon, Check, Key as KeyIcon, Lock as LockIcon, Mail } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import { useProducts } from '../../context/ProductContext';
@@ -28,6 +28,7 @@ export default function AdminSettings() {
   const tabs = [
     { icon: Layout, label: 'Home Page' },
     { icon: User, label: 'Brand Settings' },
+    { icon: Mail, label: 'Contact Info' },
     { icon: Layout, label: 'Categories' },
     { icon: Settings, label: 'General' },
     { icon: Bell, label: 'Notifications' },
@@ -61,6 +62,11 @@ export default function AdminSettings() {
   const handleSaveGeneral = () => {
     alert('General settings saved successfully!');
     // In a real app, we'd update a global store or backend here
+  };
+
+  const handleSaveContact = () => {
+    updateStoreSettings({ contactSettings: storeSettings.contactSettings });
+    alert('Contact information saved successfully!');
   };
 
   const addSocialImage = () => {
@@ -572,66 +578,6 @@ export default function AdminSettings() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Support Email</label>
-                          <input 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
-                            value={storeSettings.brandSettings?.email || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, email: e.target.value } 
-                            })}
-                            placeholder="e.g. contact@aurelian.com"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Contact Phone</label>
-                          <input 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
-                            value={storeSettings.brandSettings?.contactPhone || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, contactPhone: e.target.value } 
-                            })}
-                            placeholder="e.g. +880 1700-000000"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Store Address</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
-                            value={storeSettings.brandSettings?.address || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, address: e.target.value } 
-                            })}
-                            placeholder="e.g. 123 Luxury Lane, Chittagong"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Shipping & Returns</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
-                            value={storeSettings.brandSettings?.shippingReturns || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, shippingReturns: e.target.value } 
-                            })}
-                            placeholder="e.g. Free shipping on orders over ৳100..."
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Specifications</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
-                            value={storeSettings.brandSettings?.specifications || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, specifications: e.target.value } 
-                            })}
-                            placeholder="e.g. Material: 100% Cotton..."
-                          />
-                        </div>
-
-                        <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Font</label>
                           <select 
                             className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all appearance-none"
@@ -695,6 +641,91 @@ export default function AdminSettings() {
                     >
                       <Save className="w-4 h-4" />
                       Save Brand Settings
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'Contact Info' && (
+                <div className="space-y-10">
+                  <section className="space-y-6">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Contact Information</h3>
+                    <p className="text-xs text-on-surface-variant/60">Manage your store's contact details and global product information.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-low/30 p-8 rounded-[2rem] border border-outline-variant/10">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Support Email</label>
+                          <input 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                            value={storeSettings.contactSettings?.email || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              contactSettings: { ...storeSettings.contactSettings, email: e.target.value } 
+                            })}
+                            placeholder="e.g. contact@aurelian.com"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Contact Phone</label>
+                          <input 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                            value={storeSettings.contactSettings?.contactPhone || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              contactSettings: { ...storeSettings.contactSettings, contactPhone: e.target.value } 
+                            })}
+                            placeholder="e.g. +880 1700-000000"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Store Address</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
+                            value={storeSettings.contactSettings?.address || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              contactSettings: { ...storeSettings.contactSettings, address: e.target.value } 
+                            })}
+                            placeholder="e.g. 123 Luxury Lane, Chittagong"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Shipping & Returns</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none" 
+                            value={storeSettings.contactSettings?.shippingReturns || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              contactSettings: { ...storeSettings.contactSettings, shippingReturns: e.target.value } 
+                            })}
+                            placeholder="e.g. Free shipping on orders over ৳100..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Specifications</label>
+                          <textarea 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none" 
+                            value={storeSettings.contactSettings?.specifications || ''}
+                            onChange={(e) => updateStoreSettings({ 
+                              contactSettings: { ...storeSettings.contactSettings, specifications: e.target.value } 
+                            })}
+                            placeholder="e.g. Material: 100% Cotton..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
+                    <button 
+                      onClick={handleSaveContact}
+                      className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save Contact Information
                     </button>
                   </div>
                 </div>

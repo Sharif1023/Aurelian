@@ -10,23 +10,23 @@ export default function Contact() {
     {
       icon: Mail,
       title: 'Email Us',
-      value: storeSettings.brandSettings.email || 'contact@aurelian.com',
+      value: storeSettings.contactSettings?.email || 'contact@aurelian.com',
       description: 'Our support team usually responds within 24 hours.',
-      link: `mailto:${storeSettings.brandSettings.email || 'contact@aurelian.com'}`
+      link: `mailto:${storeSettings.contactSettings?.email || 'contact@aurelian.com'}`
     },
     {
       icon: MessageSquare,
       title: 'WhatsApp',
-      value: storeSettings.brandSettings.contactPhone || '+880 1700-000000',
+      value: storeSettings.contactSettings?.contactPhone || '+880 1700-000000',
       description: 'Instant support for your luxury inquiries.',
-      link: `https://wa.me/${(storeSettings.brandSettings.contactPhone || '').replace(/[^0-9]/g, '')}`
+      link: `https://wa.me/${(storeSettings.contactSettings?.contactPhone || '').replace(/[^0-9]/g, '')}`
     },
     {
       icon: Phone,
       title: 'Call Us',
-      value: storeSettings.brandSettings.contactPhone || '+880 1700-000000',
+      value: storeSettings.contactSettings?.contactPhone || '+880 1700-000000',
       description: 'Available Mon-Fri, 9am - 6pm.',
-      link: `tel:${storeSettings.brandSettings.contactPhone || ''}`
+      link: `tel:${storeSettings.contactSettings?.contactPhone || ''}`
     }
   ];
 
@@ -119,7 +119,7 @@ export default function Contact() {
               <h4 className="text-lg font-bold uppercase tracking-tight">Visit Our Atelier</h4>
             </div>
             <p className="text-white/70 leading-relaxed">
-              {storeSettings.brandSettings.address || '123 Luxury Lane, Architectural District, Chittagong, Bangladesh'}
+              {storeSettings.contactSettings?.address || '123 Luxury Lane, Architectural District, Chittagong, Bangladesh'}
             </p>
           </div>
         </motion.div>

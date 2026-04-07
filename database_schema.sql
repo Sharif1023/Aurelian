@@ -137,10 +137,16 @@ INSERT INTO settings (setting_key, setting_value) VALUES
         "bkashNumber": "01700000000",
         "nagadNumber": "01800000000"
     },
+    "socialLinks": [
+        {"platform": "Instagram", "url": "https://instagram.com/aurelian"},
+        {"platform": "Facebook", "url": "https://facebook.com/aurelian"}
+    ],
     "brandSettings": {
         "name": "AURELIAN",
         "fontFamily": "font-display",
-        "color": "#000000",
+        "color": "#000000"
+    },
+    "contactSettings": {
         "email": "contact@aurelian.com",
         "address": "123 Luxury Lane, Architectural District, Chittagong, Bangladesh",
         "contactPhone": "+880 1700-000000",

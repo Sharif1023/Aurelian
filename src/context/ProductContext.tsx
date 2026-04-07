@@ -20,6 +20,8 @@ export interface StoreSettings {
     name: string;
     fontFamily: 'font-display' | 'font-headline' | 'font-sans';
     color: string;
+  };
+  contactSettings: {
     email?: string;
     address?: string;
     contactPhone?: string;
@@ -94,7 +96,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => {
     const saved = localStorage.getItem('storeSettings');
-    return saved ? JSON.parse(saved) : {
+    const defaults: StoreSettings = {
       shippingChittagong: 60,
       shippingOutsideChittagong: 120,
       coupons: [
@@ -120,13 +122,24 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       brandSettings: {
         name: 'AURELIAN',
         fontFamily: 'font-display',
-        color: '#000000',
+        color: '#000000'
+      },
+      contactSettings: {
         email: 'contact@aurelian.com',
         address: '123 Luxury Lane, Architectural District, Chittagong, Bangladesh',
         contactPhone: '+880 1700-000000',
         shippingReturns: 'Free shipping on orders over ৳100. Easy 30-day returns.',
         specifications: 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.'
       }
+    };
+
+    if (!saved) return defaults;
+    const parsed = JSON.parse(saved);
+    return {
+      ...defaults,
+      ...parsed,
+      brandSettings: parsed.brandSettings || defaults.brandSettings,
+      contactSettings: parsed.contactSettings || defaults.contactSettings
     };
   });
 
@@ -187,7 +200,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       brandSettings: parsed.brandSettings || {
         name: 'AURELIAN',
         fontFamily: 'font-display',
-        color: '#000000',
+        color: '#000000'
+      },
+      contactSettings: parsed.contactSettings || {
         email: 'contact@aurelian.com',
         address: '123 Luxury Lane, Architectural District, Chittagong, Bangladesh',
         contactPhone: '+880 1700-000000',

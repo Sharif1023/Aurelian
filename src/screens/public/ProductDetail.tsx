@@ -211,8 +211,8 @@ export default function ProductDetail() {
                 content: '',
                 isSizeChart: true
               }] : []),
-              { title: 'Shipping & Returns', content: storeSettings.brandSettings.shippingReturns || 'Free shipping on orders over ৳100. Easy 30-day returns.' },
-              { title: 'Specifications', content: storeSettings.brandSettings.specifications || 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.' },
+              { title: 'Shipping & Returns', content: storeSettings.contactSettings?.shippingReturns || 'Free shipping on orders over ৳100. Easy 30-day returns.' },
+              { title: 'Specifications', content: storeSettings.contactSettings?.specifications || 'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.' },
             ].map((item: any) => (
               <details key={item.title} className="group border-b border-outline-variant/20">
                 <summary className="flex justify-between items-center py-5 cursor-pointer list-none">

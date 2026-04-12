@@ -138,7 +138,7 @@ export default function AdminSettings() {
           </aside>
 
           {/* Settings Content */}
-          <div className="flex-grow bg-white rounded-3xl shadow-sm border border-outline-variant/10 p-8">
+          <div className="flex-grow bg-white rounded-3xl shadow-sm border border-outline-variant/10 p-4 sm:p-8">
             <div className="max-w-4xl space-y-10">
               {activeTab === 'Home Page' && (
                 <div className="space-y-10">
@@ -148,7 +148,7 @@ export default function AdminSettings() {
                     <div className="grid grid-cols-1 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Hero Image</label>
-                        <div className="flex gap-4 items-center">
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                           <div className="w-24 h-16 rounded-xl overflow-hidden bg-surface-low flex-shrink-0 border border-outline-variant/10">
                             {localSettings.heroImage ? (
                               <img src={localSettings.heroImage} className="w-full h-full object-cover" alt="Hero Preview" />
@@ -158,9 +158,9 @@ export default function AdminSettings() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-grow flex gap-2">
+                          <div className="w-full flex gap-2">
                             <input 
-                              className="flex-grow bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                              className="flex-grow bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
                               placeholder="Image URL"
                               value={localSettings.heroImage}
                               onChange={(e) => setLocalSettings({ ...localSettings, heroImage: e.target.value })}
@@ -224,11 +224,11 @@ export default function AdminSettings() {
                     <p className="text-xs text-on-surface-variant/60">Select products to feature and manage their images (URL or Upload).</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {products.map(product => (
-                        <div key={product.id} className="flex gap-4 bg-surface-low/30 p-4 rounded-2xl border border-outline-variant/10 group">
+                        <div key={product.id} className="flex flex-col sm:flex-row gap-4 bg-surface-low/30 p-4 rounded-2xl border border-outline-variant/10 group">
                           <button
                             onClick={() => toggleBestSeller(product.id)}
                             className={cn(
-                              "relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0",
+                              "relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 mx-auto sm:mx-0",
                               localSettings.bestSellerIds.includes(product.id) ? "border-primary" : "border-transparent opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
                             )}
                           >
@@ -242,11 +242,11 @@ export default function AdminSettings() {
                             )}
                           </button>
                           
-                          <div className="flex-grow space-y-2">
+                          <div className="flex-grow space-y-2 min-w-0">
                             <p className="text-[10px] font-bold uppercase tracking-widest truncate">{product.name}</p>
                             <div className="flex gap-2">
                               <input 
-                                className="flex-grow bg-white border-none rounded-lg py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-primary" 
+                                className="flex-grow bg-white border-none rounded-lg py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-primary min-w-0" 
                                 placeholder="Image URL"
                                 value={product.image}
                                 onChange={(e) => updateProduct(product.id, { image: e.target.value })}
@@ -274,8 +274,8 @@ export default function AdminSettings() {
 
                   {/* Curated Edits Settings */}
                   <section className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Curated Edits (Home Page)</h3>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Curated Edits (Home Page)</h3>
                       <button 
                         onClick={() => {
                           const newItems = [...(localSettings.curatedEdits?.items || []), {
@@ -290,7 +290,7 @@ export default function AdminSettings() {
                             curatedEdits: { ...(localSettings.curatedEdits || { title: 'Curated Edits', items: [] }), items: newItems }
                           });
                         }}
-                        className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest"
+                        className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
                       >
                         <Plus className="w-4 h-4" /> Add Edit
                       </button>
@@ -375,7 +375,7 @@ export default function AdminSettings() {
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Image URL</label>
                                 <div className="flex gap-2">
                                   <input 
-                                    className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                                    className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
                                     value={item.image}
                                     onChange={(e) => {
                                       const newItems = [...localSettings.curatedEdits.items];
@@ -417,8 +417,8 @@ export default function AdminSettings() {
 
                   {/* Featured Collection Settings */}
                   <section className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Featured Collection (e.g., New/Eid Collection)</h3>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Featured Collection (e.g., New/Eid Collection)</h3>
                       <button 
                         onClick={() => setLocalSettings({
                           ...localSettings,
@@ -458,7 +458,7 @@ export default function AdminSettings() {
                     </div>
                     <div className="space-y-4">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 block">Select Products for Featured Collection</label>
-                      <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                         {products.map(product => (
                           <button
                             key={product.id}
@@ -491,54 +491,59 @@ export default function AdminSettings() {
 
                   {/* Social Gallery Settings */}
                   <section className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Social Gallery (As Seen On You)</h3>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Social Gallery (As Seen On You)</h3>
                       <button 
                         onClick={addSocialImage}
-                        className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest"
+                        className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
                       >
                         <Plus className="w-4 h-4" /> Add Image
                       </button>
                     </div>
                     <div className="grid grid-cols-1 gap-4">
                       {localSettings.socialGallery.map((url, index) => (
-                        <div key={index} className="flex gap-4 items-start">
-                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-surface-low flex-shrink-0 border border-outline-variant/10">
-                            {url ? (
-                              <img src={url} className="w-full h-full object-cover" alt={`Social ${index}`} />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-on-surface-variant/20">
-                                <ImageIcon className="w-6 h-6" />
+                        <div key={index} className="flex flex-col gap-4 bg-surface-low/20 p-4 rounded-2xl border border-outline-variant/5">
+                          <div className="flex flex-col xs:flex-row gap-4 w-full">
+                            <div className="w-20 h-20 rounded-xl overflow-hidden bg-surface-low flex-shrink-0 border border-outline-variant/10 mx-auto xs:mx-0">
+                              {url ? (
+                                <img src={url} className="w-full h-full object-cover" alt={`Social ${index}`} />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-on-surface-variant/20">
+                                  <ImageIcon className="w-6 h-6" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-grow flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <input 
+                                  className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                                  placeholder="Image URL"
+                                  value={url}
+                                  onChange={(e) => updateSocialImage(index, e.target.value)}
+                                />
+                                <input 
+                                  type="file" 
+                                  className="hidden" 
+                                  id={`social-upload-${index}`}
+                                  accept="image/*"
+                                  onChange={(e) => handleFileUpload(e, (base64) => updateSocialImage(index, base64))}
+                                />
+                                <label 
+                                  htmlFor={`social-upload-${index}`}
+                                  className="w-12 h-12 bg-white hover:bg-surface-lowest rounded-xl flex items-center justify-center transition-colors border border-outline-variant/10 cursor-pointer flex-shrink-0"
+                                  title="Upload Image"
+                                >
+                                  <Upload className="w-4 h-4 text-on-surface-variant" />
+                                </label>
                               </div>
-                            )}
-                          </div>
-                          <div className="flex-grow flex gap-2">
-                            <input 
-                              className="flex-grow bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
-                              placeholder="Image URL"
-                              value={url}
-                              onChange={(e) => updateSocialImage(index, e.target.value)}
-                            />
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              id={`social-upload-${index}`}
-                              accept="image/*"
-                              onChange={(e) => handleFileUpload(e, (base64) => updateSocialImage(index, base64))}
-                            />
-                            <label 
-                              htmlFor={`social-upload-${index}`}
-                              className="px-4 bg-surface-low hover:bg-surface-lowest rounded-xl flex items-center justify-center transition-colors border border-outline-variant/10 cursor-pointer"
-                              title="Upload Image"
-                            >
-                              <Upload className="w-4 h-4 text-on-surface-variant" />
-                            </label>
+                            </div>
                           </div>
                           <button 
                             onClick={() => removeSocialImage(index)}
-                            className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                            className="w-full p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors flex items-center justify-center gap-2 border border-red-100"
                           >
                             <Trash2 className="w-5 h-5" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Remove Image</span>
                           </button>
                         </div>
                       ))}
@@ -563,7 +568,7 @@ export default function AdminSettings() {
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Brand Identity</h3>
                     <p className="text-xs text-on-surface-variant/60">Customize your brand name, font, and signature color.</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-low/30 p-8 rounded-[2rem] border border-outline-variant/10">
+                    <div className="grid grid-cols-1 gap-8 bg-surface-low/30 p-4 sm:p-8 rounded-[2rem] border border-outline-variant/10">
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Name</label>
@@ -594,10 +599,10 @@ export default function AdminSettings() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Color</label>
-                          <div className="flex gap-4">
+                          <div className="flex flex-col sm:flex-row gap-4">
                             <input 
                               type="color"
-                              className="w-14 h-14 rounded-xl border-none cursor-pointer overflow-hidden p-0 bg-transparent"
+                              className="w-full sm:w-14 h-14 rounded-xl border-none cursor-pointer overflow-hidden p-0 bg-transparent"
                               value={storeSettings.brandSettings?.color || '#000000'}
                               onChange={(e) => updateStoreSettings({ 
                                 brandSettings: { ...storeSettings.brandSettings, color: e.target.value } 
@@ -615,12 +620,12 @@ export default function AdminSettings() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center justify-center bg-white rounded-2xl p-8 border border-outline-variant/10 shadow-sm">
+                      <div className="flex flex-col items-center justify-center bg-white rounded-2xl p-6 sm:p-8 border border-outline-variant/10 shadow-sm">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 mb-6">Live Preview</p>
-                        <div className="text-center space-y-4">
+                        <div className="text-center space-y-4 overflow-hidden w-full">
                           <h2 
                             className={cn(
-                              "text-4xl tracking-[0.3em] uppercase transition-all duration-500",
+                              "text-2xl sm:text-4xl tracking-[0.3em] uppercase transition-all duration-500 break-words",
                               storeSettings.brandSettings?.fontFamily
                             )}
                             style={{ color: storeSettings.brandSettings?.color }}
@@ -652,7 +657,7 @@ export default function AdminSettings() {
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Contact Information</h3>
                     <p className="text-xs text-on-surface-variant/60">Manage your store's contact details and global product information.</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-low/30 p-8 rounded-[2rem] border border-outline-variant/10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-low/30 p-4 sm:p-8 rounded-[2rem] border border-outline-variant/10">
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Support Email</label>
@@ -739,14 +744,14 @@ export default function AdminSettings() {
                     
                     <div className="space-y-6">
                       {categories.map(category => (
-                        <div key={category} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-surface-low/30 p-6 rounded-2xl border border-outline-variant/10">
+                        <div key={category} className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-center bg-surface-low/30 p-4 sm:p-6 rounded-2xl border border-outline-variant/10">
                           <div className="md:col-span-1">
                             <p className="text-xs font-bold uppercase tracking-widest">{category}</p>
                           </div>
                           <div className="md:col-span-2 space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Menu Subtitle</label>
                             <input 
-                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
                               value={storeSettings.categorySubtitles?.[category] || ''}
                               onChange={(e) => {
                                 const newSubtitles = { ...storeSettings.categorySubtitles, [category]: e.target.value };
@@ -776,7 +781,7 @@ export default function AdminSettings() {
                 <div className="space-y-10">
                   <section className="space-y-6">
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Store Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Store Name</label>
                         <input 

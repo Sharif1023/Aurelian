@@ -1,5 +1,5 @@
 import { AdminLayout } from './AdminDashboard';
-import { Search, Filter, Eye, Download, MoreHorizontal, Calendar, X, Check, Truck, XCircle, Clock, Trash2, FileText, ChevronDown } from 'lucide-react';
+import { Search, Filter, Eye, Download, MoreHorizontal, Calendar, X, Check, Truck, XCircle, Clock, Trash2, FileText, ChevronDown, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -16,6 +16,14 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showInvoiceOrder, setShowInvoiceOrder] = useState<Order | null>(null);
   const [autoDownloadOrder, setAutoDownloadOrder] = useState<Order | null>(null);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
+
+  const handleQuickDownload = (order: Order) => {
+    setIsDownloading(order.id);
+    setAutoDownloadOrder(order);
+    // Reset downloading state after a while
+    setTimeout(() => setIsDownloading(null), 3000);
+  };
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -169,26 +177,31 @@ export default function AdminOrders() {
             </div>
           </div>
 
-          <div className="flex gap-4 w-full md:w-auto">
-            <div className="flex items-center gap-2 bg-white border border-outline-variant/20 rounded-xl px-4 py-2">
-              <Calendar className="w-4 h-4 text-on-surface-variant" />
-              <input 
-                type="date" 
-                value={dateRange.start}
-                onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-                className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent"
-              />
-              <span className="text-on-surface-variant text-[10px]">—</span>
-              <input 
-                type="date" 
-                value={dateRange.end}
-                onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-                className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent"
-              />
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white border border-outline-variant/20 rounded-xl p-2 sm:px-4 sm:py-2">
+              <div className="flex items-center gap-2 px-2 py-1 sm:p-0">
+                <Calendar className="w-4 h-4 text-on-surface-variant shrink-0" />
+                <input 
+                  type="date" 
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                  className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent w-full"
+                />
+              </div>
+              <span className="hidden sm:inline text-on-surface-variant text-[10px]">—</span>
+              <div className="flex items-center gap-2 px-2 py-1 sm:p-0 border-t sm:border-t-0 border-outline-variant/10 sm:mt-0">
+                <div className="sm:hidden w-4" /> {/* Spacer for icon alignment */}
+                <input 
+                  type="date" 
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                  className="text-[10px] font-bold uppercase tracking-widest outline-none bg-transparent w-full"
+                />
+              </div>
             </div>
             <button 
               onClick={() => setDateRange({ start: '', end: '' })}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border border-outline-variant/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-surface-low transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-outline-variant/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-surface-low transition-colors"
             >
               Clear
             </button>
@@ -236,11 +249,16 @@ export default function AdminOrders() {
                   <td className="px-8 py-6 text-right">
                     <div className="flex justify-end gap-2">
                       <button 
-                        onClick={() => setAutoDownloadOrder(order)}
-                        className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary"
+                        onClick={() => handleQuickDownload(order)}
+                        className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary disabled:opacity-50"
                         title="Quick PDF Download"
+                        disabled={isDownloading === order.id}
                       >
-                        <Download className="w-4 h-4" />
+                        {isDownloading === order.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                       </button>
                       <button 
                         onClick={() => setShowInvoiceOrder(order)}
@@ -342,20 +360,25 @@ export default function AdminOrders() {
                   {order.status}
                 </span>
               </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-xs font-medium">{order.customerName}</p>
+              <div className="flex flex-wrap justify-between items-end gap-4">
+                <div className="min-w-0 flex-grow">
+                  <p className="text-xs font-medium truncate">{order.customerName}</p>
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-tighter">{order.items.length} items</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="font-headline font-bold text-sm">৳{order.total.toFixed(2)}</p>
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex flex-wrap justify-end gap-2 mt-2">
                     <button 
-                      onClick={() => setAutoDownloadOrder(order)}
-                      className="p-2 bg-surface-low rounded-lg text-on-surface-variant"
+                      onClick={() => handleQuickDownload(order)}
+                      className="p-2 bg-surface-low rounded-lg text-on-surface-variant disabled:opacity-50"
                       title="Quick PDF Download"
+                      disabled={isDownloading === order.id}
                     >
-                      <Download className="w-4 h-4" />
+                      {isDownloading === order.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
                     </button>
                     <button 
                       onClick={() => setShowInvoiceOrder(order)}
@@ -478,13 +501,13 @@ export default function AdminOrders() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col"
             >
-              <div className="p-8 space-y-6 max-h-[90vh] overflow-y-auto no-scrollbar">
-                <div className="flex justify-between items-start">
+              <div className="p-6 sm:p-8 space-y-6 overflow-y-auto no-scrollbar">
+                <div className="flex justify-between items-start sticky top-0 bg-white z-10 pb-2">
                   <div>
-                    <h3 className="text-xl font-headline font-bold">Order Details</h3>
-                    <p className="text-xs text-on-surface-variant font-mono mt-1">{selectedOrder.orderNumber}</p>
+                    <h3 className="text-lg sm:text-xl font-headline font-bold">Order Details</h3>
+                    <p className="text-[10px] sm:text-xs text-on-surface-variant font-mono mt-1">{selectedOrder.orderNumber}</p>
                   </div>
                   <button 
                     onClick={() => setSelectedOrder(null)}
@@ -494,17 +517,17 @@ export default function AdminOrders() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                   <div className="space-y-4">
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Customer</p>
-                      <p className="text-sm font-medium">{selectedOrder.customerName}</p>
-                      <p className="text-xs text-on-surface-variant">{selectedOrder.email}</p>
+                      <p className="text-sm font-medium break-words">{selectedOrder.customerName}</p>
+                      <p className="text-xs text-on-surface-variant break-all">{selectedOrder.email}</p>
                       <p className="text-xs text-on-surface-variant">{selectedOrder.phone}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Shipping Address</p>
-                      <p className="text-sm font-medium">{selectedOrder.address}</p>
+                      <p className="text-sm font-medium break-words">{selectedOrder.address}</p>
                       <p className="text-xs text-on-surface-variant">{selectedOrder.city}, {selectedOrder.zip}</p>
                     </div>
                   </div>
@@ -517,7 +540,7 @@ export default function AdminOrders() {
                       <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Payment Method</p>
                       <p className="text-sm font-medium uppercase">{selectedOrder.paymentMethod}</p>
                       {selectedOrder.paymentDetails?.transactionId && (
-                        <p className="text-[10px] font-mono text-primary">TXID: {selectedOrder.paymentDetails.transactionId}</p>
+                        <p className="text-[10px] font-mono text-primary break-all">TXID: {selectedOrder.paymentDetails.transactionId}</p>
                       )}
                     </div>
                     <div className="space-y-1">
@@ -533,25 +556,25 @@ export default function AdminOrders() {
                   <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Order Items</p>
                   <div className="space-y-3">
                     {selectedOrder.items.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-3 bg-surface-low rounded-2xl">
-                        <div className="w-12 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
+                      <div key={idx} className="flex items-center gap-3 sm:gap-4 p-3 bg-surface-low rounded-2xl">
+                        <div className="w-10 h-14 sm:w-12 sm:h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         </div>
-                        <div className="flex-grow">
-                          <p className="text-xs font-bold">{item.name}</p>
-                          <p className="text-[10px] text-on-surface-variant uppercase">Size: {item.size} / Color: {item.color}</p>
+                        <div className="flex-grow min-w-0">
+                          <p className="text-xs font-bold truncate">{item.name}</p>
+                          <p className="text-[9px] sm:text-[10px] text-on-surface-variant uppercase truncate">Size: {item.size} / Color: {item.color}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs font-bold">৳{item.price.toFixed(2)} x {item.quantity}</p>
-                          <p className="text-xs font-headline font-black">৳{(item.price * item.quantity).toFixed(2)}</p>
+                        <div className="text-right shrink-0">
+                          <p className="text-[10px] sm:text-xs font-bold">৳{item.price.toFixed(2)} x {item.quantity}</p>
+                          <p className="text-xs sm:text-sm font-headline font-black">৳{(item.price * item.quantity).toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-outline-variant/10 flex flex-col sm:flex-row justify-between items-center gap-6">
-                  <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <div className="pt-6 border-t border-outline-variant/10 flex flex-col gap-6">
+                  <div className="flex flex-col gap-3">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Update Status</p>
                     <div className="flex flex-wrap gap-2">
                       {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map((status) => (
@@ -573,16 +596,16 @@ export default function AdminOrders() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-4 w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <button 
                       onClick={() => setSelectedOrder(null)}
-                      className="flex-1 sm:flex-none px-6 py-3 bg-surface-low rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-outline-variant/10 transition-colors"
+                      className="w-full sm:flex-1 px-6 py-3 bg-surface-low rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-outline-variant/10 transition-colors"
                     >
                       Close
                     </button>
                     <button 
                       onClick={() => setShowInvoiceOrder(selectedOrder)}
-                      className="flex-1 sm:flex-none px-6 py-3 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                      className="w-full sm:flex-1 px-6 py-3 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform flex items-center justify-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
                       Print Invoice

@@ -278,9 +278,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 text-center mb-8 md:mb-12">
           <span className="text-primary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">Social Gallery</span>
           <h2 className="font-headline text-4xl font-black mb-4 tracking-tight">AS SEEN ON YOU.</h2>
-          <p className="text-on-surface-variant font-light">Tag @AurelianLuxe to be featured in our seasonal lookbook.</p>
+          <p className="text-on-surface-variant font-light">Tag @Sharuu to be featured in our seasonal lookbook.</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 px-4 max-w-[1600px] mx-auto">
           {homeSettings.socialGallery.map((src, i) => (
             <motion.div 
               key={i}

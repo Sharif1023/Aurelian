@@ -13,7 +13,9 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "10mb" }));
+// Increased limit for multiple uploaded base64 images
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
@@ -72,50 +74,127 @@ function toBoolean(value) {
 }
 
 function hasOwn(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
+  return Object.prototype.hasOwnProperty.call(obj || {}, key);
 }
 
-function normalizeProductBody(body) {
+function uniqueCleanArray(items) {
+  if (!Array.isArray(items)) return [];
+
+  return Array.from(
+    new Set(
+      items
+        .map(item => (typeof item === "string" ? item.trim() : item))
+        .filter(Boolean)
+    )
+  );
+}
+
+function getBodyValue(body, existing, bodyKeys, existingKey, fallback = null) {
+  for (const key of bodyKeys) {
+    if (hasOwn(body, key)) return body[key];
+  }
+
+  if (existing && existing[existingKey] !== undefined) {
+    return existing[existingKey];
+  }
+
+  return fallback;
+}
+
+function normalizeProductBody(body, existing = null) {
   const rawSizeChart = hasOwn(body, "size_chart_json")
     ? body.size_chart_json
-    : body.sizeChart;
+    : hasOwn(body, "sizeChart")
+      ? body.sizeChart
+      : existing
+        ? existing.size_chart_json
+        : null;
+
+  const rawImages = hasOwn(body, "images")
+    ? body.images
+    : hasOwn(body, "extraImages")
+      ? body.extraImages
+      : undefined;
+
+  const rawColors = hasOwn(body, "colors") ? body.colors : undefined;
+  const rawSizes = hasOwn(body, "sizes") ? body.sizes : undefined;
 
   return {
-    id: body.id || generateId(),
+    id: body.id || existing?.id || generateId(),
 
     product_code:
       body.product_code ||
       body.productCode ||
+      existing?.product_code ||
       `MEN-${Date.now().toString().slice(-6)}`,
 
-    name: body.name || "Untitled Product",
-    price: toNumber(body.price, 0),
+    name: getBodyValue(body, existing, ["name"], "name", "Untitled Product"),
+    price: toNumber(getBodyValue(body, existing, ["price"], "price", 0), 0),
 
     original_price: toNullableNumber(
-      hasOwn(body, "original_price") ? body.original_price : body.originalPrice
+      getBodyValue(
+        body,
+        existing,
+        ["original_price", "originalPrice"],
+        "original_price",
+        null
+      )
     ),
 
-    discount: toNullableNumber(body.discount),
-    category: body.category || "Uncategorized",
-    sub_category: body.sub_category || body.subCategory || null,
-    image: body.image || "",
-    description: body.description || "",
-    product_details: body.product_details || body.productDetails || "",
-    rating: toNumber(body.rating, 5),
-    reviews: toNumber(body.reviews, 0),
-    stock: toNumber(body.stock, 0),
-    status: body.status || "Active",
+    discount: toNullableNumber(
+      getBodyValue(body, existing, ["discount"], "discount", null)
+    ),
+
+    category: getBodyValue(
+      body,
+      existing,
+      ["category"],
+      "category",
+      "Uncategorized"
+    ),
+
+    sub_category: getBodyValue(
+      body,
+      existing,
+      ["sub_category", "subCategory"],
+      "sub_category",
+      null
+    ),
+
+    image: getBodyValue(body, existing, ["image"], "image", ""),
+
+    description: getBodyValue(
+      body,
+      existing,
+      ["description"],
+      "description",
+      ""
+    ),
+
+    product_details: getBodyValue(
+      body,
+      existing,
+      ["product_details", "productDetails"],
+      "product_details",
+      ""
+    ),
+
+    rating: toNumber(getBodyValue(body, existing, ["rating"], "rating", 5), 5),
+
+    reviews: toNumber(
+      getBodyValue(body, existing, ["reviews"], "reviews", 0),
+      0
+    ),
+
+    stock: toNumber(getBodyValue(body, existing, ["stock"], "stock", 0), 0),
+
+    status: getBodyValue(body, existing, ["status"], "status", "Active"),
 
     size_chart_json: stringifyJsonValue(rawSizeChart),
 
-    sizes: Array.isArray(body.sizes) ? body.sizes : [],
-    colors: Array.isArray(body.colors) ? body.colors : [],
-
-    images: Array.isArray(body.images)
-      ? body.images
-      : Array.isArray(body.extraImages)
-        ? body.extraImages
-        : []
+    sizes: Array.isArray(rawSizes) ? rawSizes : undefined,
+    colors: Array.isArray(rawColors) ? rawColors : undefined,
+    images: Array.isArray(rawImages) ? uniqueCleanArray(rawImages) : undefined
   };
 }
 
@@ -192,7 +271,6 @@ function formatProductRow(row, extras = {}) {
   return {
     ...row,
 
-    // Frontend-friendly camelCase fields
     productCode: row.product_code,
 
     originalPrice:
@@ -205,7 +283,6 @@ function formatProductRow(row, extras = {}) {
     sizeChart: sizeChart || undefined,
     extraImages: extras.extraImages || [],
 
-    // Keep snake_case too, so old code still works
     product_code: row.product_code,
     original_price: row.original_price,
     sub_category: row.sub_category,
@@ -274,17 +351,17 @@ async function getProductExtras(connectionOrPool, productIds) {
   const colorsMap = {};
   const imagesMap = {};
 
-  allSizes.forEach((row) => {
+  allSizes.forEach(row => {
     if (!sizesMap[row.product_id]) sizesMap[row.product_id] = [];
     sizesMap[row.product_id].push(formatSizeRow(row));
   });
 
-  allColors.forEach((row) => {
+  allColors.forEach(row => {
     if (!colorsMap[row.product_id]) colorsMap[row.product_id] = [];
     colorsMap[row.product_id].push(formatColorRow(row));
   });
 
-  allImages.forEach((row) => {
+  allImages.forEach(row => {
     if (!imagesMap[row.product_id]) imagesMap[row.product_id] = [];
     imagesMap[row.product_id].push(row.image_url);
   });
@@ -390,11 +467,9 @@ async function replaceProductImages(connection, productId, images) {
     productId
   ]);
 
-  if (!Array.isArray(images)) return;
+  const cleanImages = uniqueCleanArray(images);
 
-  for (const imageUrl of images) {
-    if (!imageUrl) continue;
-
+  for (const imageUrl of cleanImages) {
     await connection.query(
       `
       INSERT INTO product_images (
@@ -406,6 +481,20 @@ async function replaceProductImages(connection, productId, images) {
       [productId, imageUrl]
     );
   }
+}
+
+function sendDbError(res, error, fallbackMessage) {
+  if (error.code === "ER_DUP_ENTRY") {
+    return res.status(409).json({
+      message: "Duplicate value found",
+      error: error.message
+    });
+  }
+
+  return res.status(500).json({
+    message: fallbackMessage,
+    error: error.message
+  });
 }
 
 // =========================
@@ -442,14 +531,14 @@ app.get("/api/products", async (req, res) => {
       ORDER BY created_at DESC, id DESC
     `);
 
-    const productIds = products.map((product) => product.id);
+    const productIds = products.map(product => product.id);
 
     const { sizesMap, colorsMap, imagesMap } = await getProductExtras(
       pool,
       productIds
     );
 
-    const formattedProducts = products.map((product) =>
+    const formattedProducts = products.map(product =>
       formatProductRow(product, {
         sizes: sizesMap[product.id] || [],
         colors: colorsMap[product.id] || [],
@@ -459,10 +548,7 @@ app.get("/api/products", async (req, res) => {
 
     res.json(formattedProducts);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch products",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to fetch products");
   }
 });
 
@@ -478,10 +564,7 @@ app.get("/api/products/:id", async (req, res) => {
 
     res.json(product);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch product",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to fetch product");
   }
 });
 
@@ -535,9 +618,9 @@ app.post("/api/products", async (req, res) => {
       ]
     );
 
-    await replaceProductSizes(connection, product.id, product.sizes);
-    await replaceProductColors(connection, product.id, product.colors);
-    await replaceProductImages(connection, product.id, product.images);
+    await replaceProductSizes(connection, product.id, product.sizes || []);
+    await replaceProductColors(connection, product.id, product.colors || []);
+    await replaceProductImages(connection, product.id, product.images || []);
 
     await connection.commit();
 
@@ -546,11 +629,7 @@ app.post("/api/products", async (req, res) => {
     res.status(201).json(savedProduct);
   } catch (error) {
     await connection.rollback();
-
-    res.status(500).json({
-      message: "Failed to create product",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to create product");
   } finally {
     connection.release();
   }
@@ -561,22 +640,24 @@ app.put("/api/products/:id", async (req, res) => {
 
   try {
     const { id } = req.params;
-    const product = normalizeProductBody({ ...req.body, id });
 
     await connection.beginTransaction();
 
-    const [existing] = await connection.query(
-      "SELECT id FROM products WHERE id = ?",
+    const [existingProducts] = await connection.query(
+      "SELECT * FROM products WHERE id = ?",
       [id]
     );
 
-    if (existing.length === 0) {
+    if (existingProducts.length === 0) {
       await connection.rollback();
 
       return res.status(404).json({
         message: "Product not found"
       });
     }
+
+    const existingProduct = existingProducts[0];
+    const product = normalizeProductBody({ ...req.body, id }, existingProduct);
 
     await connection.query(
       `
@@ -620,15 +701,15 @@ app.put("/api/products/:id", async (req, res) => {
     );
 
     if (hasOwn(req.body, "sizes")) {
-      await replaceProductSizes(connection, id, product.sizes);
+      await replaceProductSizes(connection, id, product.sizes || []);
     }
 
     if (hasOwn(req.body, "colors")) {
-      await replaceProductColors(connection, id, product.colors);
+      await replaceProductColors(connection, id, product.colors || []);
     }
 
     if (hasOwn(req.body, "images") || hasOwn(req.body, "extraImages")) {
-      await replaceProductImages(connection, id, product.images);
+      await replaceProductImages(connection, id, product.images || []);
     }
 
     await connection.commit();
@@ -638,11 +719,7 @@ app.put("/api/products/:id", async (req, res) => {
     res.json(savedProduct);
   } catch (error) {
     await connection.rollback();
-
-    res.status(500).json({
-      message: "Failed to update product",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to update product");
   } finally {
     connection.release();
   }
@@ -659,10 +736,7 @@ app.delete("/api/products/:id", async (req, res) => {
       message: "Product deleted"
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete product",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to delete product");
   }
 });
 
@@ -679,7 +753,7 @@ app.get("/api/coupons", async (req, res) => {
     `);
 
     res.json(
-      coupons.map((coupon) => ({
+      coupons.map(coupon => ({
         ...coupon,
         discountPercent: Number(coupon.discount_percent || 0),
         discount_percent: Number(coupon.discount_percent || 0),
@@ -688,10 +762,7 @@ app.get("/api/coupons", async (req, res) => {
       }))
     );
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch coupons",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to fetch coupons");
   }
 });
 
@@ -724,10 +795,7 @@ app.get("/api/coupons/:code", async (req, res) => {
       is_active: toBoolean(coupon.is_active)
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to check coupon",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to check coupon");
   }
 });
 
@@ -766,10 +834,7 @@ app.post("/api/coupons", async (req, res) => {
 
     res.status(201).json(savedCoupon[0]);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to create coupon",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to create coupon");
   }
 });
 
@@ -784,10 +849,7 @@ app.delete("/api/coupons/:id", async (req, res) => {
       message: "Coupon deleted"
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete coupon",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to delete coupon");
   }
 });
 
@@ -812,10 +874,7 @@ app.get("/api/settings/:key", async (req, res) => {
 
     res.json(parseJsonValue(settings[0].setting_value));
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch settings",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to fetch settings");
   }
 });
 
@@ -839,10 +898,7 @@ app.put("/api/settings/:key", async (req, res) => {
 
     res.json(req.body);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to update settings",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to update settings");
   }
 });
 
@@ -860,10 +916,7 @@ app.get("/api/orders", async (req, res) => {
 
     res.json(orders);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetch orders",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to fetch orders");
   }
 });
 
@@ -961,11 +1014,7 @@ app.post("/api/orders", async (req, res) => {
     res.status(201).json(savedOrder[0]);
   } catch (error) {
     await connection.rollback();
-
-    res.status(500).json({
-      message: "Failed to create order",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to create order");
   } finally {
     connection.release();
   }
@@ -992,10 +1041,7 @@ app.put("/api/orders/:id/status", async (req, res) => {
 
     res.json(savedOrder[0]);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to update order status",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to update order status");
   }
 });
 
@@ -1010,10 +1056,7 @@ app.delete("/api/orders/:id", async (req, res) => {
       message: "Order deleted"
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete order",
-      error: error.message
-    });
+    sendDbError(res, error, "Failed to delete order");
   }
 });
 

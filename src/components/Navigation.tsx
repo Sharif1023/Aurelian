@@ -19,11 +19,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 
+const BRAND_NAME = 'SHARUU';
+
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount } = useCart();
   const { storeSettings, categories } = useProducts();
   const location = useLocation();
+
+  const safeCategories = categories || [];
+  const socialLinks = storeSettings?.socialLinks || [];
+  const categorySubtitles = storeSettings?.categorySubtitles || {};
+  const brandSettings = storeSettings?.brandSettings || {};
 
   // Close menu on route change
   useEffect(() => {
@@ -56,14 +63,12 @@ export function Navbar() {
     };
   }, [isMenuOpen]);
 
-  const menuItems = categories.map(category => ({
+  const menuItems = safeCategories.map(category => ({
     label: category,
     path: `/collection?category=${encodeURIComponent(category)}`,
-    subtitle:
-      storeSettings.categorySubtitles?.[category] || 'Explore our collection'
+    subtitle: categorySubtitles?.[category] || 'Explore our collection'
   }));
 
-  // Add Track Order at the end
   menuItems.push({
     label: 'Track Order',
     path: '/track-order',
@@ -88,14 +93,13 @@ export function Navbar() {
             to="/"
             className={cn(
               'uppercase tracking-[0.4em] text-2xl font-black hover:opacity-80 transition-all duration-500',
-              storeSettings.brandSettings?.fontFamily || 'font-display'
+              brandSettings?.fontFamily || 'font-display'
             )}
             style={{
-              color:
-                storeSettings.brandSettings?.color || 'var(--color-primary)'
+              color: brandSettings?.color || 'var(--color-primary)'
             }}
           >
-            {storeSettings.brandSettings?.name || 'AURELIAN'}
+            {BRAND_NAME}
           </Link>
 
           <div className="flex items-center gap-2">
@@ -146,17 +150,19 @@ export function Navbar() {
               className="fixed top-0 left-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
             >
               <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
-                <span
+                <Link
+                  to="/"
+                  onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    'font-black uppercase tracking-[0.3em] text-lg',
-                    storeSettings.brandSettings?.fontFamily || 'font-display'
+                    'font-black uppercase tracking-[0.3em] text-lg hover:opacity-70 transition-opacity',
+                    brandSettings?.fontFamily || 'font-display'
                   )}
                   style={{
-                    color: storeSettings.brandSettings?.color || 'inherit'
+                    color: brandSettings?.color || 'inherit'
                   }}
                 >
-                  {storeSettings.brandSettings?.name || 'AURELIAN'}
-                </span>
+                  {BRAND_NAME}
+                </Link>
 
                 <button
                   onClick={() => setIsMenuOpen(false)}
@@ -196,8 +202,8 @@ export function Navbar() {
 
               <div className="p-8 bg-surface-low flex justify-between items-center">
                 <div className="flex gap-6">
-                  {storeSettings.socialLinks.map((social, i) => {
-                    const platform = social.platform.toLowerCase();
+                  {socialLinks.map((social, i) => {
+                    const platform = String(social.platform || '').toLowerCase();
 
                     const Icon =
                       platform === 'instagram'
@@ -223,7 +229,7 @@ export function Navbar() {
                 </div>
 
                 <span className="font-display font-black uppercase tracking-[0.2em] text-[10px] text-on-surface-variant/40">
-                  Aurelian © 2024
+                  {BRAND_NAME} © 2024
                 </span>
               </div>
             </motion.div>
@@ -237,20 +243,23 @@ export function Navbar() {
 export function Footer() {
   const { storeSettings } = useProducts();
 
+  const socialLinks = storeSettings?.socialLinks || [];
+  const brandSettings = storeSettings?.brandSettings || {};
+
   return (
     <footer className="w-full pt-24 pb-32 bg-white text-primary flex flex-col items-center px-8 text-center relative border-t border-outline-variant/10">
-      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 text-left mb-20">
-        <div className="md:col-span-2 space-y-10">
+      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-16 text-left mb-20">
+        <div className="col-span-2 md:col-span-2 space-y-10">
           <div
             className={cn(
-              'font-black text-5xl uppercase tracking-[0.5em] leading-none mb-4',
-              storeSettings.brandSettings?.fontFamily || 'font-display'
+              'font-black text-4xl md:text-5xl uppercase tracking-[0.35em] md:tracking-[0.5em] leading-none mb-4',
+              brandSettings?.fontFamily || 'font-display'
             )}
             style={{
-              color: storeSettings.brandSettings?.color || 'inherit'
+              color: brandSettings?.color || 'inherit'
             }}
           >
-            {storeSettings.brandSettings?.name || 'AURELIAN'}
+            {BRAND_NAME}
           </div>
 
           <p className="text-on-surface-variant/70 text-sm max-w-sm font-medium leading-relaxed tracking-tight">
@@ -259,8 +268,8 @@ export function Footer() {
             wardrobe with timeless elegance since 2024.
           </p>
 
-          <div className="flex gap-6">
-            {storeSettings.socialLinks.map((social, i) => (
+          <div className="flex flex-wrap gap-6">
+            {socialLinks.map((social, i) => (
               <a
                 key={i}
                 href={social.url}
@@ -275,49 +284,49 @@ export function Footer() {
         </div>
 
         <div className="space-y-8">
-          <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] text-primary/40">
             The Collection
           </h4>
 
           <nav className="flex flex-col gap-5">
             <Link
               to="/track-order"
-              className="text-xs text-primary hover:text-primary/60 transition-colors font-bold uppercase tracking-widest underline decoration-primary/20 underline-offset-4"
+              className="text-[10px] sm:text-xs text-primary hover:text-primary/60 transition-colors font-bold uppercase tracking-widest underline decoration-primary/20 underline-offset-4"
             >
               Track Order
             </Link>
 
             <Link
               to="/collection?category=Combo"
-              className="text-xs text-primary hover:text-primary/60 transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-primary hover:text-primary/60 transition-colors font-bold uppercase tracking-widest"
             >
               Combo Offers
             </Link>
 
             <Link
               to="/collection?category=Shirt"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Shirts
             </Link>
 
             <Link
               to="/collection?category=Pant"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Pants
             </Link>
 
             <Link
               to="/collection?category=Shoes"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Shoes
             </Link>
 
             <Link
               to="/collection?category=Accessories"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Accessories
             </Link>
@@ -325,35 +334,35 @@ export function Footer() {
         </div>
 
         <div className="space-y-8">
-          <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] text-primary/40">
             Client Services
           </h4>
 
           <nav className="flex flex-col gap-5">
             <a
               href="#"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Shipping & Returns
             </a>
 
             <a
               href="#"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Privacy Policy
             </a>
 
             <a
               href="#"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Terms of Service
             </a>
 
             <Link
               to="/contact"
-              className="text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
+              className="text-[10px] sm:text-xs text-on-surface-variant hover:text-primary transition-colors font-bold uppercase tracking-widest"
             >
               Contact Us
             </Link>
@@ -365,11 +374,10 @@ export function Footer() {
         <p
           className={cn(
             'text-[9px] tracking-[0.4em] uppercase font-black',
-            storeSettings.brandSettings?.fontFamily || 'font-display'
+            brandSettings?.fontFamily || 'font-display'
           )}
         >
-          © 2024 {storeSettings.brandSettings?.name || 'AURELIAN'} LUXE.
-          CURATED ELEGANCE.
+          © 2024 {BRAND_NAME} LUXE. CURATED ELEGANCE.
         </p>
       </div>
     </footer>
@@ -387,9 +395,8 @@ export function MobileNav() {
 
   const navItems = [
     { icon: Store, label: 'Shop', path: '/' },
-   
     { icon: Menu, label: 'Category', path: '#', isMenu: true },
-     { icon: Search, label: 'Search', path: '/collection' },
+    { icon: Search, label: 'Search', path: '/collection' },
     { icon: ShoppingBag, label: 'Cart', path: '/cart' }
   ];
 

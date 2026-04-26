@@ -16,7 +16,7 @@ export default function AdminProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const itemsPerPage = 10;
-  
+
   const [formData, setFormData] = useState({
     name: '',
     productCode: '',
@@ -40,8 +40,8 @@ export default function AdminProducts() {
 
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.productCode.toLowerCase().includes(searchQuery.toLowerCase());
+      p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.productCode.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -284,7 +284,7 @@ export default function AdminProducts() {
           <h2 className="text-3xl font-headline font-extrabold tracking-tight">Products</h2>
           <p className="text-on-surface-variant">Manage your atelier inventory and archives.</p>
         </div>
-        <button 
+        <button
           onClick={() => handleOpenModal()}
           className="w-full sm:w-auto bg-primary text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest shadow-md flex items-center justify-center gap-2 hover:scale-105 transition-transform"
         >
@@ -311,8 +311,8 @@ export default function AdminProducts() {
               onClick={() => setSelectedCategory(cat)}
               className={cn(
                 "whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm border",
-                selectedCategory === cat 
-                  ? "bg-primary text-white border-primary" 
+                selectedCategory === cat
+                  ? "bg-primary text-white border-primary"
                   : "bg-white border-outline-variant/20 text-on-surface-variant hover:bg-surface-low"
               )}
             >
@@ -380,19 +380,19 @@ export default function AdminProducts() {
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex justify-end gap-2 relative">
-                      <button 
+                      <button
                         onClick={() => handleOpenModal(product)}
                         className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-primary hidden md:block"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(product.id)}
                         className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant hover:text-red-600 hidden md:block"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}
                         className="p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant"
                       >
@@ -409,19 +409,19 @@ export default function AdminProducts() {
                               exit={{ opacity: 0, scale: 0.95, y: 10 }}
                               className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-outline-variant/10 z-20 overflow-hidden"
                             >
-                              <button 
+                              <button
                                 onClick={() => handleOpenModal(product)}
                                 className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant hover:bg-surface-low transition-colors flex items-center gap-3"
                               >
                                 <Edit3 className="w-3.5 h-3.5" /> Edit Product
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDuplicate(product)}
                                 className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant hover:bg-surface-low transition-colors flex items-center gap-3"
                               >
                                 <Plus className="w-3.5 h-3.5" /> Duplicate
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDelete(product.id)}
                                 className="w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
                               >
@@ -451,13 +451,13 @@ export default function AdminProducts() {
                   <div className="flex justify-between items-start">
                     <p className="text-xs font-bold uppercase tracking-wide">{product.name}</p>
                     <div className="flex gap-1">
-                      <button 
+                      <button
                         onClick={() => handleOpenModal(product)}
                         className="p-2 text-on-surface-variant hover:text-primary"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => deleteProduct(product.id)}
                         className="p-2 text-on-surface-variant hover:text-red-600"
                       >
@@ -489,14 +489,14 @@ export default function AdminProducts() {
             Page {currentPage} of {totalPages || 1}
           </p>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
               className="px-4 py-2 bg-white border border-outline-variant/20 rounded-lg text-[10px] font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-surface-low transition-colors"
             >
               Prev
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
               className="px-4 py-2 bg-white border border-outline-variant/20 rounded-lg text-[10px] font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-surface-low transition-colors"
@@ -532,7 +532,7 @@ export default function AdminProducts() {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -540,7 +540,7 @@ export default function AdminProducts() {
                     <input
                       required
                       value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary"
                       placeholder="e.g. Silk Evening Gown"
                     />
@@ -550,7 +550,7 @@ export default function AdminProducts() {
                     <input
                       required
                       value={formData.productCode}
-                      onChange={(e) => setFormData({...formData, productCode: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, productCode: e.target.value })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary"
                       placeholder="e.g. ARL-W001"
                     />
@@ -566,7 +566,7 @@ export default function AdminProducts() {
                         const disc = parseFloat(formData.discount) || 0;
                         const final = disc > 0 ? orig * (1 - disc / 100) : orig;
                         setFormData({
-                          ...formData, 
+                          ...formData,
                           originalPrice: e.target.value,
                           price: disc > 0 ? final.toFixed(2) : formData.price
                         });
@@ -586,7 +586,7 @@ export default function AdminProducts() {
                         const orig = parseFloat(formData.originalPrice) || parseFloat(formData.price) || 0;
                         const final = orig * (1 - disc / 100);
                         setFormData({
-                          ...formData, 
+                          ...formData,
                           discount: e.target.value,
                           price: final.toFixed(2),
                           originalPrice: formData.originalPrice || formData.price
@@ -603,7 +603,7 @@ export default function AdminProducts() {
                       type="number"
                       step="0.01"
                       value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary font-bold text-primary"
                       placeholder="0.00"
                     />
@@ -618,7 +618,7 @@ export default function AdminProducts() {
                         onChange={(e) => {
                           const newCat = e.target.value;
                           setFormData({
-                            ...formData, 
+                            ...formData,
                             category: newCat,
                             sizes: editingProduct ? formData.sizes : getDefaultSizesForCategory(newCat)
                           });
@@ -637,7 +637,7 @@ export default function AdminProducts() {
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Subcategory (Optional)</label>
                     <input
                       value={formData.subCategory}
-                      onChange={(e) => setFormData({...formData, subCategory: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary"
                       placeholder="e.g. Formal, Casual, Winter"
                     />
@@ -648,7 +648,7 @@ export default function AdminProducts() {
                       required
                       type="number"
                       value={formData.stock}
-                      onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary"
                       placeholder="0"
                     />
@@ -657,7 +657,7 @@ export default function AdminProducts() {
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Status</label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({...formData, status: e.target.value as any})}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                       className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary appearance-none"
                     >
                       <option value="Active">Active</option>
@@ -671,21 +671,21 @@ export default function AdminProducts() {
                       <input
                         required
                         value={formData.image}
-                        onChange={(e) => setFormData({...formData, image: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary pr-12"
                         placeholder="https://..."
                       />
-                      <button 
+                      <button
                         type="button"
                         onClick={() => document.getElementById('image-upload')?.click()}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white rounded-lg transition-colors text-on-surface-variant/40 hover:text-primary"
                       >
                         <Upload className="w-4 h-4" />
                       </button>
-                      <input 
+                      <input
                         id="image-upload"
-                        type="file" 
-                        className="hidden" 
+                        type="file"
+                        className="hidden"
                         accept="image/*"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
@@ -705,7 +705,7 @@ export default function AdminProducts() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Size Availability</label>
-                    <button 
+                    <button
                       type="button"
                       onClick={addSize}
                       className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline"
@@ -756,19 +756,19 @@ export default function AdminProducts() {
                     <p className="text-[10px] text-on-surface-variant/60 italic">No sizes defined for this product.</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Size Chart (Measurement Table)</label>
                     <div className="flex gap-4">
-                      <button 
+                      <button
                         type="button"
                         onClick={addSizeChartColumn}
                         className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline"
                       >
                         + Add Column
                       </button>
-                      <button 
+                      <button
                         type="button"
                         onClick={addSizeChartRow}
                         className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline"
@@ -777,10 +777,10 @@ export default function AdminProducts() {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Chart Title (e.g. Panjabi Size Chart)</label>
-                    <input 
+                    <input
                       value={formData.sizeChart.title}
                       onChange={(e) => setFormData({
                         ...formData,
@@ -799,7 +799,7 @@ export default function AdminProducts() {
                             <th key={i} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant relative group">
                               <div className="flex items-center justify-between">
                                 {col}
-                                <button 
+                                <button
                                   type="button"
                                   onClick={() => removeSizeChartColumn(col)}
                                   className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity"
@@ -817,7 +817,7 @@ export default function AdminProducts() {
                           <tr key={rowIndex}>
                             {formData.sizeChart.columns.map((col, colIndex) => (
                               <td key={colIndex} className="px-2 py-2">
-                                <input 
+                                <input
                                   value={row[col] || ''}
                                   onChange={(e) => updateSizeChartRow(rowIndex, col, e.target.value)}
                                   className="w-full bg-transparent border-none px-2 py-1 text-xs outline-none focus:bg-surface-low rounded"
@@ -826,7 +826,7 @@ export default function AdminProducts() {
                               </td>
                             ))}
                             <td className="px-2 py-2 text-right">
-                              <button 
+                              <button
                                 type="button"
                                 onClick={() => removeSizeChartRow(rowIndex)}
                                 className="p-1 hover:bg-red-50 text-red-500 rounded transition-colors"
@@ -852,7 +852,7 @@ export default function AdminProducts() {
                     required
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary resize-none"
                     placeholder="Brief summary of the product..."
                   />
@@ -863,21 +863,21 @@ export default function AdminProducts() {
                   <textarea
                     rows={6}
                     value={formData.productDetails}
-                    onChange={(e) => setFormData({...formData, productDetails: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}
                     className="w-full bg-surface-low border-none rounded-xl px-6 py-4 outline-none focus:ring-1 focus:ring-primary resize-none"
                     placeholder="List the technical details, materials, and care instructions..."
                   />
                 </div>
 
                 <div className="pt-4 flex flex-col sm:flex-row gap-4">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
                     className="flex-1 py-4 rounded-xl border border-outline-variant/30 text-[10px] font-bold uppercase tracking-widest hover:bg-surface-low transition-colors"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="flex-1 py-4 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg hover:shadow-xl transition-all active:scale-95"
                   >

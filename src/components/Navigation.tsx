@@ -229,7 +229,7 @@ export function Navbar() {
                 </div>
 
                 <span className="font-display font-black uppercase tracking-[0.2em] text-[10px] text-on-surface-variant/40">
-                  {BRAND_NAME} © 2024
+                  {BRAND_NAME} © 2026
                 </span>
               </div>
             </motion.div>
@@ -265,7 +265,7 @@ export function Footer() {
           <p className="text-on-surface-variant/70 text-sm max-w-sm font-medium leading-relaxed tracking-tight">
             A global destination for curated men's luxury, architectural
             silhouettes, and bespoke craftsmanship. Redefining the modern man's
-            wardrobe with timeless elegance since 2024.
+            wardrobe with timeless elegance since 2026.
           </p>
 
           <div className="flex flex-wrap gap-6">
@@ -377,7 +377,7 @@ export function Footer() {
             brandSettings?.fontFamily || 'font-display'
           )}
         >
-          © 2024 {BRAND_NAME} LUXE. CURATED ELEGANCE.
+          © 2026 {BRAND_NAME} LUXE. CURATED ELEGANCE.
         </p>
       </div>
     </footer>

@@ -1,18 +1,13 @@
 -- =========================================================
--- Aurelian Luxe Atelier Database Schema & Demo Data
--- Full Updated Version
--- Compatible with XAMPP / phpMyAdmin / MySQL / MariaDB
+-- SHARUU Hosting Ready Database Import
+-- For cPanel / Hostinger / shared hosting phpMyAdmin
+--
+-- IMPORTANT:
+-- 1) Hosting panel theke database create koro.
+-- 2) phpMyAdmin open kore oi database select koro.
+-- 3) Tarpor ei SQL import/paste koro.
+-- 4) Ei file existing app tables drop kore abar create korbe.
 -- =========================================================
-
-CREATE DATABASE IF NOT EXISTS aurelian_luxe
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE aurelian_luxe;
-
-ALTER DATABASE aurelian_luxe
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -59,12 +54,13 @@ CREATE TABLE products (
 
 CREATE TABLE product_sizes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id VARCHAR(50),
+    product_id VARCHAR(50) NOT NULL,
     size VARCHAR(20) NOT NULL,
     is_available BOOLEAN DEFAULT TRUE,
     quantity INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_product_size (product_id, size),
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -74,11 +70,12 @@ CREATE TABLE product_sizes (
 
 CREATE TABLE product_colors (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id VARCHAR(50),
+    product_id VARCHAR(50) NOT NULL,
     name VARCHAR(50) NOT NULL,
     hex_code VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_product_color (product_id, name),
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -88,7 +85,7 @@ CREATE TABLE product_colors (
 
 CREATE TABLE product_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id VARCHAR(50),
+    product_id VARCHAR(50) NOT NULL,
     image_url LONGTEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -210,6 +207,10 @@ CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_products_status ON products(status);
 CREATE INDEX idx_products_created_at ON products(created_at);
 
+CREATE INDEX idx_product_sizes_product_id ON product_sizes(product_id);
+CREATE INDEX idx_product_colors_product_id ON product_colors(product_id);
+CREATE INDEX idx_product_images_product_id ON product_images(product_id);
+
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_payment_status ON orders(payment_status);
 CREATE INDEX idx_orders_created_at ON orders(created_at);
@@ -255,7 +256,16 @@ INSERT INTO products (
     124,
     42,
     'Active',
-    NULL
+    '{
+      "title": "Shirt Size Chart",
+      "columns": ["Size", "Chest", "Length", "Sleeve", "Collar"],
+      "rows": [
+        {"Size": "S", "Chest": "38", "Length": "28", "Sleeve": "24", "Collar": "15"},
+        {"Size": "M", "Chest": "40", "Length": "29", "Sleeve": "24.5", "Collar": "15.5"},
+        {"Size": "L", "Chest": "42", "Length": "30", "Sleeve": "25", "Collar": "16"},
+        {"Size": "XL", "Chest": "44", "Length": "31", "Sleeve": "25.5", "Collar": "16.5"}
+      ]
+    }'
 ),
 (
     '2',
@@ -273,7 +283,15 @@ INSERT INTO products (
     89,
     15,
     'Active',
-    NULL
+    '{
+      "title": "T-Shirt Size Chart",
+      "columns": ["Size", "Chest", "Length", "Shoulder"],
+      "rows": [
+        {"Size": "S", "Chest": "36", "Length": "27", "Shoulder": "16"},
+        {"Size": "M", "Chest": "38", "Length": "28", "Shoulder": "17"},
+        {"Size": "L", "Chest": "40", "Length": "29", "Shoulder": "18"}
+      ]
+    }'
 ),
 (
     '3',
@@ -291,7 +309,16 @@ INSERT INTO products (
     56,
     28,
     'Active',
-    NULL
+    '{
+      "title": "Pant Size Chart",
+      "columns": ["Size", "Waist", "Length", "Hip"],
+      "rows": [
+        {"Size": "30", "Waist": "30", "Length": "40", "Hip": "38"},
+        {"Size": "32", "Waist": "32", "Length": "41", "Hip": "40"},
+        {"Size": "34", "Waist": "34", "Length": "42", "Hip": "42"},
+        {"Size": "36", "Waist": "36", "Length": "43", "Hip": "44"}
+      ]
+    }'
 ),
 (
     '4',
@@ -309,7 +336,16 @@ INSERT INTO products (
     42,
     8,
     'Active',
-    NULL
+    '{
+      "title": "Shoe Size Chart",
+      "columns": ["Size", "UK", "EU", "Foot Length"],
+      "rows": [
+        {"Size": "40", "UK": "6", "EU": "40", "Foot Length": "25.5 cm"},
+        {"Size": "41", "UK": "7", "EU": "41", "Foot Length": "26 cm"},
+        {"Size": "42", "UK": "8", "EU": "42", "Foot Length": "26.5 cm"},
+        {"Size": "43", "UK": "9", "EU": "43", "Foot Length": "27.5 cm"}
+      ]
+    }'
 ),
 (
     '5',
@@ -327,7 +363,13 @@ INSERT INTO products (
     210,
     12,
     'Active',
-    NULL
+    '{
+      "title": "Belt Size Chart",
+      "columns": ["Size", "Waist Fit", "Total Length"],
+      "rows": [
+        {"Size": "One Size", "Waist Fit": "30-38", "Total Length": "110 cm"}
+      ]
+    }'
 );
 
 -- =========================================================
@@ -397,7 +439,7 @@ INSERT INTO product_images (product_id, image_url) VALUES
 
 INSERT INTO coupons (id, code, discount_percent, is_active) VALUES
 ('1', 'WELCOME10', 10, 1),
-('2', 'AURELIAN20', 20, 1);
+('2', 'SHARUU20', 20, 1);
 
 -- =========================================================
 -- Complete Store Settings
@@ -411,14 +453,14 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     "shippingOutsideChittagong": 120,
 
     "generalSettings": {
-      "storeName": "Aurelian Luxe",
-      "storeEmail": "atelier@aurelian.com",
-      "storeDescription": "A global destination for curated luxury and timeless elegance.",
+      "storeName": "Sharuu",
+      "storeEmail": "support@sharuu.com",
+      "storeDescription": "A destination for curated fashion and timeless elegance.",
       "currency": "BDT (৳)",
       "currencyCode": "BDT",
       "currencySymbol": "৳",
       "weightUnit": "Kilograms (kg)",
-      "orderPrefix": "ARL",
+      "orderPrefix": "SHR",
       "timezone": "Asia/Dhaka"
     },
 
@@ -437,11 +479,11 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     "socialLinks": [
       {
         "platform": "Instagram",
-        "url": "https://instagram.com/aurelian"
+        "url": "https://instagram.com/sharuu"
       },
       {
         "platform": "Facebook",
-        "url": "https://facebook.com/aurelian"
+        "url": "https://facebook.com/sharuu"
       }
     ],
 
@@ -455,15 +497,15 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     },
 
     "brandSettings": {
-      "name": "AURELIAN",
+      "name": "SHARUU",
       "fontFamily": "font-display",
       "color": "#000000",
-      "tagline": "Luxe Atelier"
+      "tagline": "Fashion Atelier"
     },
 
     "contactSettings": {
-      "email": "contact@aurelian.com",
-      "address": "123 Luxury Lane, Architectural District, Chittagong, Bangladesh",
+      "email": "contact@sharuu.com",
+      "address": "Chittagong, Bangladesh",
       "contactPhone": "+880 1700-000000",
       "shippingReturns": "Free shipping on orders over ৳100. Easy 30-day returns.",
       "specifications": "Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean."
@@ -474,7 +516,7 @@ INSERT INTO settings (setting_key, setting_value) VALUES
       "customerOrderConfirmation": true,
       "lowStockAlerts": true,
       "newsletterEnabled": false,
-      "notificationEmail": "atelier@aurelian.com"
+      "notificationEmail": "support@sharuu.com"
     },
 
     "localizationSettings": {
@@ -495,8 +537,8 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     },
 
     "accountSettings": {
-      "ownerName": "Aurelian Admin",
-      "ownerEmail": "atelier@aurelian.com",
+      "ownerName": "Sharuu Admin",
+      "ownerEmail": "support@sharuu.com",
       "role": "Super Admin"
     }
   }'
@@ -511,9 +553,9 @@ INSERT INTO settings (setting_key, setting_value) VALUES
   'home_settings',
   '{
     "heroImage": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop",
-    "heroBadge": "Autumn / Winter 2024",
+    "heroBadge": "New Collection",
     "heroTitle": "The Art of Modern Elegance",
-    "heroSubtitle": "Discover our curated collection of artisanal pieces designed for the contemporary individual.",
+    "heroSubtitle": "Discover our curated collection of pieces designed for the contemporary individual.",
     "heroVideoUrl": "https://player.vimeo.com/external/459389137.sd.mp4?s=8946331db3c989d0f11b92277409696516056064&profile_id=164&oauth2_token_id=57447761",
 
     "bestSellerIds": ["1", "2", "3", "4"],
@@ -563,10 +605,10 @@ INSERT INTO settings (setting_key, setting_value) VALUES
 
 -- =========================================================
 -- Demo Admin User
--- =========================================================
 -- This password_hash is a placeholder.
 -- In real backend, create bcrypt hash using Node.js bcrypt.
 -- Do not use plain text password in database.
+-- =========================================================
 
 INSERT INTO admin_users (
     id,
@@ -579,7 +621,7 @@ INSERT INTO admin_users (
 (
     '1',
     'admin',
-    'atelier@aurelian.com',
+    'support@sharuu.com',
     '$2b$10$replace_this_with_real_bcrypt_hash_from_backend',
     'SuperAdmin',
     1
@@ -592,6 +634,15 @@ INSERT INTO admin_users (
 SELECT 'Database setup completed successfully.' AS message;
 
 SELECT COUNT(*) AS total_products FROM products;
+SELECT COUNT(*) AS total_product_sizes FROM product_sizes;
+SELECT COUNT(*) AS total_product_colors FROM product_colors;
+SELECT COUNT(*) AS total_product_images FROM product_images;
 SELECT COUNT(*) AS total_coupons FROM coupons;
 SELECT COUNT(*) AS total_settings FROM settings;
 SELECT COUNT(*) AS total_admin_users FROM admin_users;
+
+SELECT
+    id,
+    name,
+    JSON_UNQUOTE(JSON_EXTRACT(size_chart_json, '$.title')) AS size_chart_title
+FROM products;

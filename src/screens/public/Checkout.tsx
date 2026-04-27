@@ -26,13 +26,13 @@ export default function Checkout() {
       window.scrollTo(0, 0);
     }
   }, [isSuccess]);
-  
+
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
   const [couponError, setCouponError] = useState('');
 
-  const shippingCost = cartItems.length > 0 
-    ? (shippingArea === 'Chittagong' ? storeSettings.shippingChittagong : storeSettings.shippingOutsideChittagong) 
+  const shippingCost = cartItems.length > 0
+    ? (shippingArea === 'Chittagong' ? storeSettings.shippingChittagong : storeSettings.shippingOutsideChittagong)
     : 0;
   const discountAmount = appliedCoupon ? (subtotal * appliedCoupon.discountPercent) / 100 : 0;
   const total = subtotal + shippingCost - discountAmount;
@@ -47,7 +47,7 @@ export default function Checkout() {
       setAppliedCoupon(null);
     }
   };
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -72,7 +72,7 @@ export default function Checkout() {
     }
 
     setIsProcessing(true);
-    
+
     try {
       const newOrder = createOrder({
         customerName: formData.fullName,
@@ -117,14 +117,14 @@ export default function Checkout() {
   if (isSuccess) {
     return (
       <main className="pt-24 pb-32 px-4 sm:px-6 max-w-7xl mx-auto min-h-screen flex flex-col items-center justify-center text-center">
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8"
         >
           <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12" />
         </motion.div>
-        
+
         <div className="space-y-2 mb-8">
           <h1 className="font-headline text-3xl sm:text-4xl font-extrabold tracking-tight">Order Confirmed</h1>
           <p className="text-on-surface-variant text-sm sm:text-base">Thank you for your purchase. Your order has been placed successfully.</p>
@@ -139,7 +139,7 @@ export default function Checkout() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg">
-          <button 
+          <button
             onClick={() => setShowInvoice(true)}
             className="flex-1 px-8 py-5 bg-white border border-outline-variant/20 text-primary rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-surface-low transition-colors"
           >
@@ -153,10 +153,10 @@ export default function Checkout() {
 
         <AnimatePresence>
           {showInvoice && completedOrder && (
-            <Invoice 
-              order={completedOrder} 
-              brandName={storeSettings.brandSettings.name} 
-              onClose={() => setShowInvoice(false)} 
+            <Invoice
+              order={completedOrder}
+              brandName={storeSettings.brandSettings.name}
+              onClose={() => setShowInvoice(false)}
             />
           )}
         </AnimatePresence>
@@ -168,7 +168,7 @@ export default function Checkout() {
     <main className="pt-20 pb-32 px-4 sm:px-6 max-w-7xl mx-auto min-h-screen">
       {/* Mobile Order Summary Toggle */}
       <div className="lg:hidden mb-6">
-        <button 
+        <button
           onClick={() => setIsSummaryOpen(!isSummaryOpen)}
           className="w-full bg-surface-low p-4 rounded-2xl flex items-center justify-between border border-outline-variant/10"
         >
@@ -181,7 +181,7 @@ export default function Checkout() {
           </div>
           {isSummaryOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
-        
+
         <AnimatePresence>
           {isSummaryOpen && (
             <motion.div
@@ -244,48 +244,48 @@ export default function Checkout() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Full Name *</label>
-                <input 
-                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
-                  placeholder="John Doe"
+                <input
+                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
+                  placeholder="Enter your full name"
                   value={formData.fullName}
-                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Email Address *</label>
-                <input 
-                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
-                  placeholder="john@example.com"
+                <input
+                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
+                  placeholder="Enter your email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Phone Number *</label>
-                <input 
-                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                <input
+                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                   placeholder="017XXXXXXXX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Full Address *</label>
-                <input 
-                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                <input
+                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                   placeholder="House #, Road #, Area"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">City *</label>
-                <input 
-                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
-                  placeholder="Dhaka"
+                <input
+                  className="w-full bg-surface-low border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
+                  placeholder="Chittagong"
                   value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                 />
               </div>
             </div>
@@ -297,27 +297,23 @@ export default function Checkout() {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-surface-low text-primary rounded-full flex items-center justify-center font-bold text-sm sm:text-base">2</div>
               <h2 className="text-lg sm:text-xl font-bold uppercase tracking-widest">Payment Method</h2>
             </div>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
               {[
-                { id: 'COD', icon: Banknote, label: 'Cash on Delivery' },
+                { id: 'COD', logo: 'https://cdn.iconscout.com/icon/free/png-256/free-cash-on-delivery-icon-svg-download-png-1569374.png', label: 'Cash on Delivery' },
                 { id: 'Card', logo: 'https://img.icons8.com/color/96/visa.png', label: 'Card' },
-                { id: 'bKash', icon: CreditCard, label: 'bKash' },
-                { id: 'Nagad', icon: CreditCard, label: 'Nagad' },
+                { id: 'bKash', logo: 'https://wp.logos-download.com/wp-content/uploads/2022/01/BKash_Logo_icon-700x662.png', label: 'bKash' },
+                { id: 'Nagad', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8f/Nagad-png.png', label: 'Nagad' },
               ].map((p) => (
-                <button 
-                  key={p.id} 
+                <button
+                  key={p.id}
                   onClick={() => setPaymentMethod(p.id as any)}
                   className={cn(
                     "flex flex-col items-center justify-center p-4 rounded-2xl border transition-all group active:scale-95 h-24",
                     paymentMethod === p.id ? "border-primary bg-primary/5" : "border-outline-variant/30 hover:border-primary"
                   )}
                 >
-                  {p.icon ? (
-                    <p.icon className={cn("w-6 h-6 mb-2", paymentMethod === p.id ? "text-primary" : "group-hover:text-primary")} />
-                  ) : (
-                    <img src={p.logo} alt={p.label} className="w-10 h-10 object-contain mb-2" referrerPolicy="no-referrer" />
-                  )}
+                  <img src={p.logo} alt={p.label} className="w-10 h-10 object-contain mb-2" referrerPolicy="no-referrer" />
                   <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center">{p.label}</span>
                 </button>
               ))}
@@ -325,7 +321,7 @@ export default function Checkout() {
 
             <AnimatePresence mode="wait">
               {paymentMethod === 'Card' && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -333,30 +329,30 @@ export default function Checkout() {
                 >
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Card Number</label>
-                    <input 
-                      className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                    <input
+                      className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                       placeholder="XXXX XXXX XXXX XXXX"
                       value={formData.cardNumber}
-                      onChange={(e) => setFormData({...formData, cardNumber: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Expiry Date</label>
-                      <input 
-                        className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                      <input
+                        className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                         placeholder="MM/YY"
                         value={formData.cardExpiry}
-                        onChange={(e) => setFormData({...formData, cardExpiry: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, cardExpiry: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">CVC</label>
-                      <input 
-                        className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                      <input
+                        className="w-full bg-surface-low border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                         placeholder="XXX"
                         value={formData.cardCVC}
-                        onChange={(e) => setFormData({...formData, cardCVC: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, cardCVC: e.target.value })}
                       />
                     </div>
                   </div>
@@ -364,7 +360,7 @@ export default function Checkout() {
               )}
 
               {['bKash', 'Nagad'].includes(paymentMethod) && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -373,18 +369,18 @@ export default function Checkout() {
                   <p className="text-sm font-medium mb-2">Please send the total amount to: <span className="font-bold text-primary">{paymentMethod === 'bKash' ? storeSettings.paymentSettings.bkashNumber : storeSettings.paymentSettings.nagadNumber}</span></p>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Transaction ID / Last 4 Digit / Reference *</label>
-                    <input 
-                      className="w-full bg-white border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm" 
+                    <input
+                      className="w-full bg-white border-none rounded-xl px-4 py-4 outline-none focus:ring-1 focus:ring-primary text-sm"
                       placeholder="Enter Transaction ID / Last 4 Digit / Reference"
                       value={formData.transactionId}
-                      onChange={(e) => setFormData({...formData, transactionId: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, transactionId: e.target.value })}
                     />
                   </div>
                 </motion.div>
               )}
 
               {paymentMethod === 'COD' && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -430,7 +426,7 @@ export default function Checkout() {
                   <span>-${discountAmount.toFixed(2)}</span>
                 </div>
               )}
-              
+
               <div className="pt-4 space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Shipping Area *</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -454,17 +450,17 @@ export default function Checkout() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="pt-4 space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Coupon Code</label>
                 <div className="flex gap-2">
-                  <input 
-                    className="flex-grow bg-white border border-outline-variant/20 rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-primary text-xs" 
+                  <input
+                    className="flex-grow bg-white border border-outline-variant/20 rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-primary text-xs"
                     placeholder="ENTER CODE"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                   />
-                  <button 
+                  <button
                     onClick={handleApplyCoupon}
                     className="bg-primary text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest"
                   >
@@ -480,8 +476,8 @@ export default function Checkout() {
                 <span className="font-headline text-2xl font-black">৳{total.toFixed(2)}</span>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={handleCompleteOrder}
               disabled={isProcessing}
               className="flex w-full bg-primary text-white py-5 rounded-full font-bold uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transition-all active:scale-95 items-center justify-center gap-3"

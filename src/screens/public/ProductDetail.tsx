@@ -196,12 +196,13 @@ export default function ProductDetail() {
                 No Image
               </div>
             )}
-
+             {/*
             <div className="absolute top-6 left-6 pointer-events-none">
               <span className="bg-white px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase text-primary shadow-sm rounded-full">
                 New Arrival
               </span>
             </div>
+            */}
           </div>
 
           {/* Thumbnails only */}
@@ -308,6 +309,7 @@ export default function ProductDetail() {
               </div>
             </div>
 
+            {/*}
             {availableColors.length > 1 && (
               <div>
                 <div className="flex justify-between items-end mb-4">
@@ -350,6 +352,10 @@ export default function ProductDetail() {
                 </div>
               </div>
             )}
+
+            */}
+
+
           </div>
 
           {/* CTAs */}

@@ -7,7 +7,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: ["https://sharuu.com", "https://www.sharuu.com"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
@@ -19,9 +19,9 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "aurelian_luxe",
+  user: process.env.DB_USER || "sharuuco",
+  password: process.env.DB_PASSWORD || "aurelian_luxe@90",
+  database: process.env.DB_NAME || "sharuuco_aurelian_luxe",
   port: Number(process.env.DB_PORT || 3306),
   waitForConnections: true,
   connectionLimit: 10,

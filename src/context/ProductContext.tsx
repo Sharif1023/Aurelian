@@ -9,7 +9,7 @@ import React, {
 import { Product, Order, Coupon, PRODUCTS } from '../types';
 
 const API_BASE_URL =
-  ((import.meta as any).env?.VITE_API_URL as string) || 'http://localhost:5000/api';
+  ((import.meta as any).env?.VITE_API_URL as string) || 'https://sharuu.com/backend/api';
 
 export interface SocialLink {
   platform: string;

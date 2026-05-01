@@ -629,11 +629,11 @@ INSERT INTO admin_users (
     '1',
     'admin',
     'support@sharuu.com',
-    '$2b$10$FgaUanhNuCIpg.KrTI49oOgCBuvnlmo6kQ3Kjwxn7DYwG3SR8yYPS', --admin123--   
+    '$2b$10$FgaUanhNuCIpg.KrTI49oOgCBuvnlmo6kQ3Kjwxn7DYwG3SR8yYPS',  
     'SuperAdmin',
     1
 );
-
+ --admin123-- 
 -- =========================================================
 -- Final Check Queries
 -- =========================================================

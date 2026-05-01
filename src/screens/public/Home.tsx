@@ -399,40 +399,91 @@ export default function Home() {
       </section>
 
       {/* Social Proof - Grid */}
-      <section className="py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-6 text-center mb-8 md:mb-12">
-          <span className="text-primary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
-            Social Gallery
-          </span>
-          <h2 className="font-headline text-4xl font-black mb-4 tracking-tight">
-            AS SEEN ON YOU.
-          </h2>
-          <p className="text-on-surface-variant font-light">
-            Tag @Sharuu to be featured in our seasonal lookbook.
-          </p>
-        </div>
+      {/* Social Proof - Exclusive Editorial Gallery */}
+<section className="py-16 md:py-24 bg-[#fdfdfb] overflow-hidden">
+  <div className="max-w-7xl mx-auto px-6 mb-10 md:mb-16">
+    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+      <div>
+        <span className="text-primary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
+          Social Gallery
+        </span>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 px-4 max-w-[1600px] mx-auto">
-          {homeSettings.socialGallery.map((src, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 0.98 }}
-              className="aspect-[4/5] overflow-hidden rounded-2xl"
-            >
-              <img
-                className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000"
-                src={src}
-                alt={`Social ${i}`}
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-          ))}
-        </div>
-      </section>
+        <h2 className="font-headline text-4xl md:text-6xl font-black tracking-tight uppercase leading-none">
+          As Seen <br className="hidden md:block" />
+          On You.
+        </h2>
+      </div>
+
+      <p className="text-on-surface-variant font-light max-w-md text-sm md:text-base leading-relaxed">
+        Real moments, real style. Tag{' '}
+        <span className="font-bold text-primary">@Sharuu</span> to be featured
+        in our seasonal lookbook.
+      </p>
+    </div>
+  </div>
+
+  <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[220px] md:auto-rows-[320px]">
+      {homeSettings.socialGallery.map((src, i) => {
+        const isFeature = i === 0;
+
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{
+              delay: i * 0.08,
+              duration: 0.7,
+              ease: [0.21, 0.47, 0.32, 0.98],
+            }}
+            viewport={{ once: true, margin: '-80px' }}
+            whileHover={{ y: -8 }}
+            className={cn(
+              'group relative overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-surface-low shadow-xl shadow-black/5',
+              isFeature && 'col-span-2 row-span-2'
+            )}
+          >
+            <img
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              src={src}
+              alt={`Social gallery ${i + 1}`}
+              referrerPolicy="no-referrer"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
+
+            
+
+            <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+              <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl p-4 shadow-xl">
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-primary mb-1">
+                  Community Style
+                </p>
+
+                <p className="font-headline font-black text-sm md:text-lg uppercase tracking-tight text-black">
+                  Shop The Look
+                </p>
+              </div>
+            </div>
+
+            {isFeature && (
+              <div className="absolute left-5 bottom-5 md:left-8 md:bottom-8 max-w-xs group-hover:opacity-0 transition-opacity duration-500">
+                <p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.35em] mb-3">
+                  Featured Look
+                </p>
+
+                <h3 className="font-headline text-white text-3xl md:text-5xl font-black uppercase leading-none">
+                  Styled By You
+                </h3>
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
+    </div>
+  </div>
+</section>
     </div>
   );
 }

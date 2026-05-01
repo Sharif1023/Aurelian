@@ -279,147 +279,285 @@ export default function AdminSettings() {
                   </section>
 
                   {/* Curated Edits Settings */}
-                  <section className="space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Curated Edits (Home Page)</h3>
-                      <button
-                        onClick={() => {
-                          const newItems = [...(localSettings.curatedEdits?.items || []), {
-                            id: Math.random().toString(36).substr(2, 9),
-                            title: 'New Edit',
-                            subtitle: 'New Subtitle',
-                            image: '',
-                            link: '/collection'
-                          }];
-                          setLocalSettings({
-                            ...localSettings,
-                            curatedEdits: { ...(localSettings.curatedEdits || { title: 'Curated Edits', items: [] }), items: newItems }
-                          });
-                        }}
-                        className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
-                      >
-                        <Plus className="w-4 h-4" /> Add Edit
-                      </button>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Section Title</label>
-                        <input
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
-                          value={localSettings.curatedEdits?.title || ''}
-                          onChange={(e) => setLocalSettings({
-                            ...localSettings,
-                            curatedEdits: { ...(localSettings.curatedEdits || { title: '', items: [] }), title: e.target.value }
-                          })}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-6">
-                        {localSettings.curatedEdits?.items?.map((item, index) => (
-                          <div key={item.id} className="bg-surface-low/30 p-6 rounded-2xl border border-outline-variant/10 space-y-4">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">Edit #{index + 1}</span>
-                              <button
-                                onClick={() => {
-                                  const newItems = (localSettings.curatedEdits?.items || []).filter((_, i) => i !== index);
-                                  setLocalSettings({
-                                    ...localSettings,
-                                    curatedEdits: { ...(localSettings.curatedEdits || { title: '', items: [] }), items: newItems }
-                                  });
-                                }}
-                                className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Title</label>
-                                <input
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
-                                  value={item.title}
-                                  onChange={(e) => {
-                                    const newItems = [...(localSettings.curatedEdits?.items || [])];
-                                    newItems[index] = { ...item, title: e.target.value };
-                                    setLocalSettings({
-                                      ...localSettings,
-                                      curatedEdits: { ...(localSettings.curatedEdits || { title: '', items: [] }), items: newItems }
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Subtitle</label>
-                                <input
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
-                                  value={item.subtitle}
-                                  onChange={(e) => {
-                                    const newItems = [...(localSettings.curatedEdits?.items || [])];
-                                    newItems[index] = { ...item, subtitle: e.target.value };
-                                    setLocalSettings({
-                                      ...localSettings,
-                                      curatedEdits: { ...(localSettings.curatedEdits || { title: '', items: [] }), items: newItems }
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Link (e.g. /collection?category=Shirt)</label>
-                                <input
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
-                                  value={item.link}
-                                  onChange={(e) => {
-                                    const newItems = [...localSettings.curatedEdits.items];
-                                    newItems[index].link = e.target.value;
-                                    setLocalSettings({
-                                      ...localSettings,
-                                      curatedEdits: { ...localSettings.curatedEdits, items: newItems }
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Image URL</label>
-                                <div className="flex gap-2">
-                                  <input
-                                    className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
-                                    value={item.image}
-                                    onChange={(e) => {
-                                      const newItems = [...localSettings.curatedEdits.items];
-                                      newItems[index].image = e.target.value;
-                                      setLocalSettings({
-                                        ...localSettings,
-                                        curatedEdits: { ...localSettings.curatedEdits, items: newItems }
-                                      });
-                                    }}
-                                  />
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    id={`curated-upload-${index}`}
-                                    accept="image/*"
-                                    onChange={(e) => handleFileUpload(e, (base64) => {
-                                      const newItems = [...localSettings.curatedEdits.items];
-                                      newItems[index].image = base64;
-                                      setLocalSettings({
-                                        ...localSettings,
-                                        curatedEdits: { ...localSettings.curatedEdits, items: newItems }
-                                      });
-                                    })}
-                                  />
-                                  <label
-                                    htmlFor={`curated-upload-${index}`}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm cursor-pointer hover:bg-surface-low transition-colors border border-outline-variant/10"
-                                  >
-                                    <Upload className="w-4 h-4 text-primary" />
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
+                  {/* Curated Edits Settings */}
+<section className="space-y-6">
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">
+      Curated Edits (Home Page)
+    </h3>
+
+    <button
+      onClick={() => {
+        const newItems = [
+          ...(localSettings.curatedEdits?.items || []),
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            title: 'New Edit',
+            subtitle: 'New Subtitle',
+            image: '',
+            link: '/collection',
+          },
+        ];
+
+        setLocalSettings({
+          ...localSettings,
+          curatedEdits: {
+            ...(localSettings.curatedEdits || {
+              title: 'Curated Edits',
+              items: [],
+            }),
+            items: newItems,
+          },
+        });
+      }}
+      className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
+    >
+      <Plus className="w-4 h-4" /> Add Edit
+    </button>
+  </div>
+
+  <div className="space-y-4">
+    <div className="space-y-2">
+      <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+        Section Title
+      </label>
+
+      <input
+        className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
+        value={localSettings.curatedEdits?.title || ''}
+        onChange={(e) =>
+          setLocalSettings({
+            ...localSettings,
+            curatedEdits: {
+              ...(localSettings.curatedEdits || { title: '', items: [] }),
+              title: e.target.value,
+            },
+          })
+        }
+      />
+    </div>
+
+    <div className="grid grid-cols-1 gap-6">
+      {localSettings.curatedEdits?.items?.map((item, index) => (
+        <div
+          key={item.id}
+          className="bg-surface-low/30 p-6 rounded-2xl border border-outline-variant/10 space-y-4"
+        >
+          <div className="flex justify-between items-start">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">
+              Edit #{index + 1}
+            </span>
+
+            <button
+              onClick={() => {
+                const newItems = (
+                  localSettings.curatedEdits?.items || []
+                ).filter((_, i) => i !== index);
+
+                setLocalSettings({
+                  ...localSettings,
+                  curatedEdits: {
+                    ...(localSettings.curatedEdits || {
+                      title: '',
+                      items: [],
+                    }),
+                    items: newItems,
+                  },
+                });
+              }}
+              className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                Title
+              </label>
+
+              <input
+                className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
+                value={item.title}
+                onChange={(e) => {
+                  const newItems = [
+                    ...(localSettings.curatedEdits?.items || []),
+                  ];
+
+                  newItems[index] = {
+                    ...item,
+                    title: e.target.value,
+                  };
+
+                  setLocalSettings({
+                    ...localSettings,
+                    curatedEdits: {
+                      ...(localSettings.curatedEdits || {
+                        title: '',
+                        items: [],
+                      }),
+                      items: newItems,
+                    },
+                  });
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                Subtitle
+              </label>
+
+              <input
+                className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
+                value={item.subtitle}
+                onChange={(e) => {
+                  const newItems = [
+                    ...(localSettings.curatedEdits?.items || []),
+                  ];
+
+                  newItems[index] = {
+                    ...item,
+                    subtitle: e.target.value,
+                  };
+
+                  setLocalSettings({
+                    ...localSettings,
+                    curatedEdits: {
+                      ...(localSettings.curatedEdits || {
+                        title: '',
+                        items: [],
+                      }),
+                      items: newItems,
+                    },
+                  });
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                Link (e.g. /collection?category=Shirt)
+              </label>
+
+              <input
+                className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
+                value={item.link}
+                onChange={(e) => {
+                  const newItems = [
+                    ...(localSettings.curatedEdits?.items || []),
+                  ];
+
+                  newItems[index] = {
+                    ...item,
+                    link: e.target.value,
+                  };
+
+                  setLocalSettings({
+                    ...localSettings,
+                    curatedEdits: {
+                      ...(localSettings.curatedEdits || {
+                        title: '',
+                        items: [],
+                      }),
+                      items: newItems,
+                    },
+                  });
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                Image URL
+              </label>
+
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden bg-white border border-outline-variant/10 shrink-0 flex items-center justify-center">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.title || 'Curated edit preview'}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <Upload className="w-4 h-4 text-on-surface-variant/40" />
+                  )}
+                </div>
+
+                <input
+                  className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
+                  value={item.image}
+                  placeholder="Paste image URL here"
+                  onChange={(e) => {
+                    const newItems = [
+                      ...(localSettings.curatedEdits?.items || []),
+                    ];
+
+                    newItems[index] = {
+                      ...item,
+                      image: e.target.value,
+                    };
+
+                    setLocalSettings({
+                      ...localSettings,
+                      curatedEdits: {
+                        ...(localSettings.curatedEdits || {
+                          title: '',
+                          items: [],
+                        }),
+                        items: newItems,
+                      },
+                    });
+                  }}
+                />
+
+                <input
+                  type="file"
+                  className="hidden"
+                  id={`curated-upload-${index}`}
+                  accept="image/*"
+                  onChange={(e) =>
+                    handleFileUpload(e, (base64) => {
+                      const newItems = [
+                        ...(localSettings.curatedEdits?.items || []),
+                      ];
+
+                      newItems[index] = {
+                        ...item,
+                        image: base64,
+                      };
+
+                      setLocalSettings({
+                        ...localSettings,
+                        curatedEdits: {
+                          ...(localSettings.curatedEdits || {
+                            title: '',
+                            items: [],
+                          }),
+                          items: newItems,
+                        },
+                      });
+                    })
+                  }
+                />
+
+                <label
+                  htmlFor={`curated-upload-${index}`}
+                  className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm cursor-pointer hover:bg-surface-low transition-colors border border-outline-variant/10 shrink-0"
+                >
+                  <Upload className="w-4 h-4 text-primary" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
                   {/* Featured Collection Settings */}
                   <section className="space-y-6">
@@ -506,7 +644,7 @@ export default function AdminSettings() {
                         <Plus className="w-4 h-4" /> Add Image
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                       {localSettings.socialGallery.map((url, index) => (
                         <div key={index} className="flex flex-col gap-4 bg-surface-low/20 p-4 rounded-2xl border border-outline-variant/5">
                           <div className="flex flex-col xs:flex-row gap-4 w-full">

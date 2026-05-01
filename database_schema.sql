@@ -629,7 +629,7 @@ INSERT INTO admin_users (
     '1',
     'admin',
     'support@sharuu.com',
-    '$2b$10$replace_this_with_real_bcrypt_hash_from_backend',
+    '$2b$10$FgaUanhNuCIpg.KrTI49oOgCBuvnlmo6kQ3Kjwxn7DYwG3SR8yYPS', --admin123--   
     'SuperAdmin',
     1
 );

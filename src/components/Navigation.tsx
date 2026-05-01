@@ -70,7 +70,7 @@ export function Navbar() {
   const menuItems = safeCategories.map(category => ({
     label: category,
     path: `/collection?category=${encodeURIComponent(category)}`,
-    subtitle: categorySubtitles?.[category] || 'Explore our collection'
+    subtitle: categorySubtitles?.[category] || ''
   }));
 
   menuItems.push({

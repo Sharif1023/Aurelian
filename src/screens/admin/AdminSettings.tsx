@@ -228,7 +228,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Best Sellers</h3>
                     <p className="text-xs text-on-surface-variant/60">Select products to feature and manage their images (URL or Upload).</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                       {products.map(product => (
                         <div key={product.id} className="flex flex-col sm:flex-row gap-4 bg-surface-low/30 p-4 rounded-2xl border border-outline-variant/10 group">
                           <button

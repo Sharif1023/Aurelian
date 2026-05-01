@@ -385,7 +385,7 @@ export function Footer() {
             brandSettings.fontFamily || 'font-display'
           )}
         >
-          © 2026 {brandSettings?.name || BRAND_NAME} LUXE. CURATED ELEGANCE.
+          © 2026 {brandSettings?.name || BRAND_NAME}. CURATED ELEGANCE.
         </p>
       </div>
     </footer>

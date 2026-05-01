@@ -14,7 +14,7 @@ import Checkout from './screens/public/Checkout';
 import Wishlist from './screens/public/Wishlist';
 import SignIn from './screens/public/SignIn';
 import TrackOrder from './screens/public/TrackOrder';
-import Contact from './screens/public/contact';
+import Contact from './screens/public/Contact';
 import AdminDashboard from './screens/admin/AdminDashboard';
 import AdminProducts from './screens/admin/AdminProducts';
 import AdminOrders from './screens/admin/AdminOrders';
@@ -22,9 +22,11 @@ import AdminCustomers from './screens/admin/AdminCustomers';
 import AdminMarketing from './screens/admin/AdminMarketing';
 import AdminSettings from './screens/admin/AdminSettings';
 import AdminGuard from './components/AdminGuard';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
+import { apiGet } from './lib/api';
+import { getAdminPath, normalizeAdminPath } from './lib/utils';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -38,9 +40,34 @@ import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
   const location = useLocation();
-  const adminPath = localStorage.getItem('admin_path') || 'admin';
+  const [adminPath, setAdminPath] = useState(() => getAdminPath(location.pathname));
   const isAdmin = location.pathname.startsWith(`/${adminPath}`);
   const isAuth = location.pathname === '/signin';
+
+  useEffect(() => {
+    const loadAdminPath = async () => {
+      try {
+        const savedPath = await apiGet<string>('/settings/admin_path');
+        const normalized = normalizeAdminPath(savedPath);
+
+        if (normalized && normalized !== adminPath) {
+          localStorage.setItem('admin_path', normalized);
+          setAdminPath(normalized);
+        }
+      } catch {
+        // If backend path is not set or unavailable, keep current path.
+      }
+    };
+
+    loadAdminPath();
+  }, [adminPath]);
+
+  useEffect(() => {
+    const normalized = getAdminPath(location.pathname);
+    if (normalized !== adminPath) {
+      setAdminPath(normalized);
+    }
+  }, [location.pathname, adminPath]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,7 +86,7 @@ function AppContent() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/contact" element={<Contact />} />
-          
+
           {/* Admin Routes with Guard */}
           <Route path={`/${adminPath}/*`} element={
             <AdminGuard>

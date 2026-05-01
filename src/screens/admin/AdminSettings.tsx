@@ -1,11 +1,12 @@
 import { AdminLayout } from './AdminDashboard';
-import { Settings, Bell, Shield, Globe, CreditCard, User, Save, Layout, Plus, Trash2, Upload, Image as ImageIcon, Check, Key as KeyIcon, Lock as LockIcon, Mail } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { Settings, Shield, Globe, CreditCard, User, Save, Layout, Plus, Trash2, Upload, Image as ImageIcon, Check, Key as KeyIcon, Lock as LockIcon, Mail } from 'lucide-react';
+import { cn, normalizeAdminPath, getAdminPath } from '@/src/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import { useProducts } from '../../context/ProductContext';
+import { apiPut, changeAdminPassword } from '../../lib/api';
 
 export default function AdminSettings() {
-  const { products, homeSettings, updateHomeSettings, updateProduct, storeSettings, updateStoreSettings, categories } = useProducts();
+  const { products, homeSettings, updateHomeSettings, updateProduct, storeSettings, updateStoreSettings, categories, refreshData } = useProducts();
   const [activeTab, setActiveTab] = useState('Home Page');
   const [localSettings, setLocalSettings] = useState(homeSettings);
 
@@ -22,6 +23,14 @@ export default function AdminSettings() {
     weightUnit: 'Kilograms (kg)'
   });
 
+  useEffect(() => {
+    setGeneralSettings(storeSettings.generalSettings);
+  }, [storeSettings.generalSettings]);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
   const heroInputRef = useRef<HTMLInputElement>(null);
   const socialInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -31,11 +40,8 @@ export default function AdminSettings() {
     { icon: Mail, label: 'Contact Info' },
     { icon: Layout, label: 'Categories' },
     { icon: Settings, label: 'General' },
-    { icon: Bell, label: 'Notifications' },
     { icon: Shield, label: 'Security' },
-    { icon: Globe, label: 'Localization' },
     { icon: CreditCard, label: 'Payments' },
-    { icon: User, label: 'Account' },
   ];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
@@ -60,8 +66,8 @@ export default function AdminSettings() {
   };
 
   const handleSaveGeneral = () => {
+    updateStoreSettings({ generalSettings });
     alert('General settings saved successfully!');
-    // In a real app, we'd update a global store or backend here
   };
 
   const handleSaveContact = () => {
@@ -159,20 +165,20 @@ export default function AdminSettings() {
                             )}
                           </div>
                           <div className="w-full flex gap-2">
-                            <input 
-                              className="flex-grow bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                            <input
+                              className="flex-grow bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
                               placeholder="Image URL"
                               value={localSettings.heroImage}
                               onChange={(e) => setLocalSettings({ ...localSettings, heroImage: e.target.value })}
                             />
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              ref={heroInputRef} 
+                            <input
+                              type="file"
+                              className="hidden"
+                              ref={heroInputRef}
                               accept="image/*"
                               onChange={(e) => handleFileUpload(e, (base64) => setLocalSettings({ ...localSettings, heroImage: base64 }))}
                             />
-                            <button 
+                            <button
                               onClick={() => heroInputRef.current?.click()}
                               className="px-4 bg-surface-low hover:bg-surface-lowest rounded-xl flex items-center justify-center transition-colors border border-outline-variant/10"
                               title="Upload Image"
@@ -184,32 +190,32 @@ export default function AdminSettings() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Hero Badge (e.g. Autumn / Winter 2024)</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={localSettings.heroBadge}
                           onChange={(e) => setLocalSettings({ ...localSettings, heroBadge: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Hero Title (Use \n for line break)</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={localSettings.heroTitle}
                           onChange={(e) => setLocalSettings({ ...localSettings, heroTitle: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Hero Subtitle</label>
-                        <textarea 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary h-24 resize-none" 
+                        <textarea
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary h-24 resize-none"
                           value={localSettings.heroSubtitle}
                           onChange={(e) => setLocalSettings({ ...localSettings, heroSubtitle: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Hero Video URL (Watch Film)</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           placeholder="YouTube Video URL"
                           value={localSettings.heroVideoUrl}
                           onChange={(e) => setLocalSettings({ ...localSettings, heroVideoUrl: e.target.value })}
@@ -241,24 +247,24 @@ export default function AdminSettings() {
                               </div>
                             )}
                           </button>
-                          
+
                           <div className="flex-grow space-y-2 min-w-0">
                             <p className="text-[10px] font-bold uppercase tracking-widest truncate">{product.name}</p>
                             <div className="flex gap-2">
-                              <input 
-                                className="flex-grow bg-white border-none rounded-lg py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                              <input
+                                className="flex-grow bg-white border-none rounded-lg py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-primary min-w-0"
                                 placeholder="Image URL"
                                 value={product.image}
                                 onChange={(e) => updateProduct(product.id, { image: e.target.value })}
                               />
-                              <input 
-                                type="file" 
+                              <input
+                                type="file"
                                 id={`upload-${product.id}`}
-                                className="hidden" 
+                                className="hidden"
                                 accept="image/*"
                                 onChange={(e) => handleProductImageUpload(product.id, e)}
                               />
-                              <label 
+                              <label
                                 htmlFor={`upload-${product.id}`}
                                 className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm cursor-pointer hover:bg-surface-low transition-colors border border-outline-variant/10"
                                 title="Upload Image"
@@ -276,7 +282,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Curated Edits (Home Page)</h3>
-                      <button 
+                      <button
                         onClick={() => {
                           const newItems = [...(localSettings.curatedEdits?.items || []), {
                             id: Math.random().toString(36).substr(2, 9),
@@ -298,8 +304,8 @@ export default function AdminSettings() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Section Title</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={localSettings.curatedEdits?.title || ''}
                           onChange={(e) => setLocalSettings({
                             ...localSettings,
@@ -312,7 +318,7 @@ export default function AdminSettings() {
                           <div key={item.id} className="bg-surface-low/30 p-6 rounded-2xl border border-outline-variant/10 space-y-4">
                             <div className="flex justify-between items-start">
                               <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40">Edit #{index + 1}</span>
-                              <button 
+                              <button
                                 onClick={() => {
                                   const newItems = (localSettings.curatedEdits?.items || []).filter((_, i) => i !== index);
                                   setLocalSettings({
@@ -328,8 +334,8 @@ export default function AdminSettings() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Title</label>
-                                <input 
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                                <input
+                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
                                   value={item.title}
                                   onChange={(e) => {
                                     const newItems = [...(localSettings.curatedEdits?.items || [])];
@@ -343,8 +349,8 @@ export default function AdminSettings() {
                               </div>
                               <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Subtitle</label>
-                                <input 
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                                <input
+                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
                                   value={item.subtitle}
                                   onChange={(e) => {
                                     const newItems = [...(localSettings.curatedEdits?.items || [])];
@@ -358,8 +364,8 @@ export default function AdminSettings() {
                               </div>
                               <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Link (e.g. /collection?category=Shirt)</label>
-                                <input 
-                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                                <input
+                                  className="w-full bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary"
                                   value={item.link}
                                   onChange={(e) => {
                                     const newItems = [...localSettings.curatedEdits.items];
@@ -374,8 +380,8 @@ export default function AdminSettings() {
                               <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Image URL</label>
                                 <div className="flex gap-2">
-                                  <input 
-                                    className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                                  <input
+                                    className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
                                     value={item.image}
                                     onChange={(e) => {
                                       const newItems = [...localSettings.curatedEdits.items];
@@ -386,9 +392,9 @@ export default function AdminSettings() {
                                       });
                                     }}
                                   />
-                                  <input 
-                                    type="file" 
-                                    className="hidden" 
+                                  <input
+                                    type="file"
+                                    className="hidden"
                                     id={`curated-upload-${index}`}
                                     accept="image/*"
                                     onChange={(e) => handleFileUpload(e, (base64) => {
@@ -400,7 +406,7 @@ export default function AdminSettings() {
                                       });
                                     })}
                                   />
-                                  <label 
+                                  <label
                                     htmlFor={`curated-upload-${index}`}
                                     className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm cursor-pointer hover:bg-surface-low transition-colors border border-outline-variant/10"
                                   >
@@ -419,7 +425,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Featured Collection (e.g., New/Eid Collection)</h3>
-                      <button 
+                      <button
                         onClick={() => setLocalSettings({
                           ...localSettings,
                           featuredCollection: { ...localSettings.featuredCollection, show: !localSettings.featuredCollection.show }
@@ -435,8 +441,8 @@ export default function AdminSettings() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Section Title</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={localSettings.featuredCollection.title}
                           onChange={(e) => setLocalSettings({
                             ...localSettings,
@@ -446,8 +452,8 @@ export default function AdminSettings() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Section Subtitle</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={localSettings.featuredCollection.subtitle}
                           onChange={(e) => setLocalSettings({
                             ...localSettings,
@@ -493,7 +499,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <h3 className="text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-on-surface-variant break-words">Social Gallery (As Seen On You)</h3>
-                      <button 
+                      <button
                         onClick={addSocialImage}
                         className="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
                       >
@@ -515,20 +521,20 @@ export default function AdminSettings() {
                             </div>
                             <div className="flex-grow flex flex-col gap-2">
                               <div className="flex gap-2">
-                                <input 
-                                  className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                                <input
+                                  className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
                                   placeholder="Image URL"
                                   value={url}
                                   onChange={(e) => updateSocialImage(index, e.target.value)}
                                 />
-                                <input 
-                                  type="file" 
-                                  className="hidden" 
+                                <input
+                                  type="file"
+                                  className="hidden"
                                   id={`social-upload-${index}`}
                                   accept="image/*"
                                   onChange={(e) => handleFileUpload(e, (base64) => updateSocialImage(index, base64))}
                                 />
-                                <label 
+                                <label
                                   htmlFor={`social-upload-${index}`}
                                   className="w-12 h-12 bg-white hover:bg-surface-lowest rounded-xl flex items-center justify-center transition-colors border border-outline-variant/10 cursor-pointer flex-shrink-0"
                                   title="Upload Image"
@@ -538,7 +544,7 @@ export default function AdminSettings() {
                               </div>
                             </div>
                           </div>
-                          <button 
+                          <button
                             onClick={() => removeSocialImage(index)}
                             className="w-full p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors flex items-center justify-center gap-2 border border-red-100"
                           >
@@ -551,7 +557,7 @@ export default function AdminSettings() {
                   </section>
 
                   <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
-                    <button 
+                    <button
                       onClick={handleSaveHome}
                       className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
                     >
@@ -567,16 +573,16 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Brand Identity</h3>
                     <p className="text-xs text-on-surface-variant/60">Customize your brand name, font, and signature color.</p>
-                    
+
                     <div className="grid grid-cols-1 gap-8 bg-surface-low/30 p-4 sm:p-8 rounded-[2rem] border border-outline-variant/10">
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Name</label>
-                          <input 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                          <input
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all"
                             value={storeSettings.brandSettings?.name || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, name: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              brandSettings: { ...storeSettings.brandSettings, name: e.target.value }
                             })}
                             placeholder="e.g. AURELIAN"
                           />
@@ -584,11 +590,11 @@ export default function AdminSettings() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Font</label>
-                          <select 
+                          <select
                             className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all appearance-none"
                             value={storeSettings.brandSettings?.fontFamily || 'font-display'}
-                            onChange={(e) => updateStoreSettings({ 
-                              brandSettings: { ...storeSettings.brandSettings, fontFamily: e.target.value as any } 
+                            onChange={(e) => updateStoreSettings({
+                              brandSettings: { ...storeSettings.brandSettings, fontFamily: e.target.value as any }
                             })}
                           >
                             <option value="font-display">Playfair Display (Elegant Serif)</option>
@@ -600,20 +606,20 @@ export default function AdminSettings() {
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Brand Color</label>
                           <div className="flex flex-col sm:flex-row gap-4">
-                            <input 
+                            <input
                               type="color"
                               className="w-full sm:w-14 h-14 rounded-xl border-none cursor-pointer overflow-hidden p-0 bg-transparent"
                               value={storeSettings.brandSettings?.color || '#000000'}
-                              onChange={(e) => updateStoreSettings({ 
-                                brandSettings: { ...storeSettings.brandSettings, color: e.target.value } 
+                              onChange={(e) => updateStoreSettings({
+                                brandSettings: { ...storeSettings.brandSettings, color: e.target.value }
                               })}
                             />
-                            <input 
+                            <input
                               type="text"
                               className="flex-grow bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-mono outline-none focus:ring-2 focus:ring-primary transition-all uppercase"
                               value={storeSettings.brandSettings?.color || '#000000'}
-                              onChange={(e) => updateStoreSettings({ 
-                                brandSettings: { ...storeSettings.brandSettings, color: e.target.value } 
+                              onChange={(e) => updateStoreSettings({
+                                brandSettings: { ...storeSettings.brandSettings, color: e.target.value }
                               })}
                             />
                           </div>
@@ -623,7 +629,7 @@ export default function AdminSettings() {
                       <div className="flex flex-col items-center justify-center bg-white rounded-2xl p-6 sm:p-8 border border-outline-variant/10 shadow-sm">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 mb-6">Live Preview</p>
                         <div className="text-center space-y-4 overflow-hidden w-full">
-                          <h2 
+                          <h2
                             className={cn(
                               "text-2xl sm:text-4xl tracking-[0.3em] uppercase transition-all duration-500 break-words",
                               storeSettings.brandSettings?.fontFamily
@@ -640,7 +646,7 @@ export default function AdminSettings() {
                   </section>
 
                   <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
-                    <button 
+                    <button
                       onClick={handleSaveBrand}
                       className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
                     >
@@ -656,16 +662,16 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Contact Information</h3>
                     <p className="text-xs text-on-surface-variant/60">Manage your store's contact details and global product information.</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-low/30 p-4 sm:p-8 rounded-[2rem] border border-outline-variant/10">
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Support Email</label>
-                          <input 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                          <input
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all"
                             value={storeSettings.contactSettings?.email || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              contactSettings: { ...storeSettings.contactSettings, email: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              contactSettings: { ...storeSettings.contactSettings, email: e.target.value }
                             })}
                             placeholder="e.g. contact@aurelian.com"
                           />
@@ -673,11 +679,11 @@ export default function AdminSettings() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Contact Phone</label>
-                          <input 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all" 
+                          <input
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all"
                             value={storeSettings.contactSettings?.contactPhone || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              contactSettings: { ...storeSettings.contactSettings, contactPhone: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              contactSettings: { ...storeSettings.contactSettings, contactPhone: e.target.value }
                             })}
                             placeholder="e.g. +880 1700-000000"
                           />
@@ -685,11 +691,11 @@ export default function AdminSettings() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Store Address</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none" 
+                          <textarea
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-24 resize-none"
                             value={storeSettings.contactSettings?.address || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              contactSettings: { ...storeSettings.contactSettings, address: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              contactSettings: { ...storeSettings.contactSettings, address: e.target.value }
                             })}
                             placeholder="e.g. 123 Luxury Lane, Chittagong"
                           />
@@ -699,11 +705,11 @@ export default function AdminSettings() {
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Shipping & Returns</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none" 
+                          <textarea
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none"
                             value={storeSettings.contactSettings?.shippingReturns || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              contactSettings: { ...storeSettings.contactSettings, shippingReturns: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              contactSettings: { ...storeSettings.contactSettings, shippingReturns: e.target.value }
                             })}
                             placeholder="e.g. Free shipping on orders over ৳100..."
                           />
@@ -711,11 +717,11 @@ export default function AdminSettings() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Global Specifications</label>
-                          <textarea 
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none" 
+                          <textarea
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-2 focus:ring-primary transition-all h-32 resize-none"
                             value={storeSettings.contactSettings?.specifications || ''}
-                            onChange={(e) => updateStoreSettings({ 
-                              contactSettings: { ...storeSettings.contactSettings, specifications: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              contactSettings: { ...storeSettings.contactSettings, specifications: e.target.value }
                             })}
                             placeholder="e.g. Material: 100% Cotton..."
                           />
@@ -725,7 +731,7 @@ export default function AdminSettings() {
                   </section>
 
                   <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
-                    <button 
+                    <button
                       onClick={handleSaveContact}
                       className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
                     >
@@ -741,7 +747,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Category Menu Subtitles</h3>
                     <p className="text-xs text-on-surface-variant/60">Customize the subtitles displayed under each category in the navigation menu.</p>
-                    
+
                     <div className="space-y-6">
                       {categories.map(category => (
                         <div key={category} className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-center bg-surface-low/30 p-4 sm:p-6 rounded-2xl border border-outline-variant/10">
@@ -750,8 +756,8 @@ export default function AdminSettings() {
                           </div>
                           <div className="md:col-span-2 space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Menu Subtitle</label>
-                            <input 
-                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0" 
+                            <input
+                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary min-w-0"
                               value={storeSettings.categorySubtitles?.[category] || ''}
                               onChange={(e) => {
                                 const newSubtitles = { ...storeSettings.categorySubtitles, [category]: e.target.value };
@@ -766,7 +772,7 @@ export default function AdminSettings() {
                   </section>
 
                   <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
-                    <button 
+                    <button
                       onClick={() => alert('Category settings saved successfully!')}
                       className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
                     >
@@ -784,24 +790,24 @@ export default function AdminSettings() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Store Name</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={generalSettings.storeName}
                           onChange={(e) => setGeneralSettings({ ...generalSettings, storeName: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Store Email</label>
-                        <input 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                        <input
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                           value={generalSettings.storeEmail}
                           onChange={(e) => setGeneralSettings({ ...generalSettings, storeEmail: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Store Description</label>
-                        <textarea 
-                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary h-24 resize-none" 
+                        <textarea
+                          className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary h-24 resize-none"
                           value={generalSettings.storeDescription}
                           onChange={(e) => setGeneralSettings({ ...generalSettings, storeDescription: e.target.value })}
                         />
@@ -814,7 +820,7 @@ export default function AdminSettings() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Currency</label>
-                        <select 
+                        <select
                           className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary appearance-none"
                           value={generalSettings.currency}
                           onChange={(e) => setGeneralSettings({ ...generalSettings, currency: e.target.value })}
@@ -826,7 +832,7 @@ export default function AdminSettings() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Weight Unit</label>
-                        <select 
+                        <select
                           className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary appearance-none"
                           value={generalSettings.weightUnit}
                           onChange={(e) => setGeneralSettings({ ...generalSettings, weightUnit: e.target.value })}
@@ -841,7 +847,7 @@ export default function AdminSettings() {
                   <section className="space-y-6">
                     <div className="flex justify-between items-center">
                       <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Social Media Links</h3>
-                      <button 
+                      <button
                         onClick={() => {
                           const newLinks = [...storeSettings.socialLinks, { platform: 'New Platform', url: '' }];
                           updateStoreSettings({ socialLinks: newLinks });
@@ -856,8 +862,8 @@ export default function AdminSettings() {
                         <div key={index} className="flex gap-4 items-center">
                           <div className="w-1/3 space-y-1">
                             <label className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant/40 ml-1">Platform</label>
-                            <input 
-                              className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                            <input
+                              className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                               value={link.platform}
                               onChange={(e) => {
                                 const newLinks = [...storeSettings.socialLinks];
@@ -869,8 +875,8 @@ export default function AdminSettings() {
                           </div>
                           <div className="flex-grow space-y-1">
                             <label className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant/40 ml-1">URL</label>
-                            <input 
-                              className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary" 
+                            <input
+                              className="w-full bg-surface-low border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-1 focus:ring-primary"
                               value={link.url}
                               onChange={(e) => {
                                 const newLinks = [...storeSettings.socialLinks];
@@ -880,7 +886,7 @@ export default function AdminSettings() {
                               placeholder="https://..."
                             />
                           </div>
-                          <button 
+                          <button
                             onClick={() => {
                               const newLinks = storeSettings.socialLinks.filter((_, i) => i !== index);
                               updateStoreSettings({ socialLinks: newLinks });
@@ -895,7 +901,7 @@ export default function AdminSettings() {
                   </section>
 
                   <div className="pt-6 border-t border-outline-variant/10 flex justify-end">
-                    <button 
+                    <button
                       onClick={handleSaveGeneral}
                       className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
                     >
@@ -925,24 +931,38 @@ export default function AdminSettings() {
                         <div className="flex gap-4">
                           <div className="relative flex-grow group">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 text-sm font-bold">/</span>
-                            <input 
+                            <input
                               id="admin-path"
                               type="text"
-                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-8 pr-4 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 transition-all" 
-                              defaultValue={localStorage.getItem('admin_path') || 'admin'}
+                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-8 pr-4 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                              defaultValue={getAdminPath(window.location.pathname)}
                               placeholder="admin"
                             />
                           </div>
-                          <button 
-                            onClick={() => {
-                              const newPath = (document.getElementById('admin-path') as HTMLInputElement).value.trim().toLowerCase();
+                          <button
+                            onClick={async () => {
+                              const newPath = normalizeAdminPath(
+                                (document.getElementById('admin-path') as HTMLInputElement).value || ''
+                              );
+
                               if (!newPath || newPath.includes('/') || newPath.includes(' ')) {
                                 alert('Invalid path. Use a single word without spaces or slashes.');
                                 return;
                               }
-                              localStorage.setItem('admin_path', newPath);
-                              alert(`Admin path updated to /${newPath}. The page will now reload.`);
-                              window.location.href = `/${newPath}/settings`;
+
+                              try {
+                                await apiPut('/settings/admin_path', newPath);
+                                localStorage.setItem('admin_path', newPath);
+                                alert(`Admin path updated to /${newPath}. The page will now reload.`);
+                                window.location.href = `/${newPath}/settings`;
+                              } catch (error) {
+                                console.error('Failed to save admin path:', error);
+                                alert(
+                                  error instanceof Error
+                                    ? error.message
+                                    : 'Unable to save admin path. Please try again.'
+                                );
+                              }
                             }}
                             className="px-8 bg-black text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-black/10 hover:scale-[1.02] transition-all active:scale-95 whitespace-nowrap"
                           >
@@ -956,7 +976,7 @@ export default function AdminSettings() {
                           <span className="text-[10px] font-bold text-white">i</span>
                         </div>
                         <p className="text-[11px] text-blue-800 font-medium leading-relaxed">
-                          Changing the admin path makes your dashboard harder to find by unauthorized users. 
+                          Changing the admin path makes your dashboard harder to find by unauthorized users.
                           After updating, you must use the new URL (e.g., yoursite.com/your-new-path) to access the admin area.
                         </p>
                       </div>
@@ -980,16 +1000,12 @@ export default function AdminSettings() {
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Current Admin Password</label>
                           <div className="relative group">
                             <KeyIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40 group-focus-within:text-black transition-colors" />
-                            <input 
+                            <input
                               type="password"
-                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all" 
+                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
                               placeholder="••••••••"
-                              onChange={(e) => {
-                                const stored = localStorage.getItem('admin_password') || 'admin';
-                                if (e.target.value === stored) {
-                                  // Can show a checkmark or something
-                                }
-                              }}
+                              value={currentPassword}
+                              onChange={(e) => setCurrentPassword(e.target.value)}
                             />
                           </div>
                         </div>
@@ -998,11 +1014,12 @@ export default function AdminSettings() {
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">New Admin Password</label>
                           <div className="relative group">
                             <LockIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40 group-focus-within:text-black transition-colors" />
-                            <input 
-                              id="new-password"
+                            <input
                               type="password"
-                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all" 
+                              className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
                               placeholder="Enter new password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
                             />
                           </div>
                         </div>
@@ -1013,44 +1030,46 @@ export default function AdminSettings() {
                           <span className="text-[10px] font-bold text-white">!</span>
                         </div>
                         <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
-                          Changing the admin password will affect all future login attempts from this browser. 
+                          Changing the admin password will affect all future login attempts from this browser.
                           Make sure to remember your new password as there is no automated recovery in this preview environment.
                         </p>
                       </div>
 
                       <div className="flex justify-end pt-4">
-                        <button 
-                          onClick={() => {
-                            const newPass = (document.getElementById('new-password') as HTMLInputElement).value;
-                            if (newPass.length < 4) {
-                              alert('Password must be at least 4 characters long');
+                        <button
+                          onClick={async () => {
+                            if (newPassword.length < 8) {
+                              alert('Password must be at least 8 characters long');
                               return;
                             }
-                            localStorage.setItem('admin_password', newPass);
-                            alert('Admin password updated successfully!');
-                            (document.getElementById('new-password') as HTMLInputElement).value = '';
+
+                            if (!currentPassword) {
+                              alert('Current password is required');
+                              return;
+                            }
+
+                            try {
+                              setIsUpdatingPassword(true);
+                              await changeAdminPassword(currentPassword, newPassword);
+                              setCurrentPassword('');
+                              setNewPassword('');
+                              alert('Admin password updated successfully!');
+                            } catch (error) {
+                              alert(error instanceof Error ? error.message : 'Failed to update admin password');
+                            } finally {
+                              setIsUpdatingPassword(false);
+                            }
                           }}
+                          disabled={isUpdatingPassword}
                           className="flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-black/10 hover:scale-[1.02] transition-all active:scale-95"
                         >
                           <Save className="w-4 h-4" />
-                          Update Password
+                          {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                         </button>
                       </div>
                     </div>
                   </section>
 
-                  <section className="space-y-6 opacity-50 pointer-events-none">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-on-surface-variant">Session Management</h3>
-                    <div className="bg-surface-low/30 p-6 rounded-2xl border border-outline-variant/10 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-on-surface">Auto-Logout</p>
-                        <p className="text-[10px] text-on-surface-variant/60">Automatically log out after 30 minutes of inactivity.</p>
-                      </div>
-                      <div className="w-12 h-6 bg-primary/20 rounded-full relative">
-                        <div className="absolute right-1 top-1 w-4 h-4 bg-primary rounded-full"></div>
-                      </div>
-                    </div>
-                  </section>
                 </div>
               )}
 
@@ -1071,32 +1090,39 @@ export default function AdminSettings() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">bKash Number</label>
-                          <input 
+                          <input
                             type="text"
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all" 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
                             value={storeSettings.paymentSettings.bkashNumber}
-                            onChange={(e) => updateStoreSettings({ 
-                              paymentSettings: { ...storeSettings.paymentSettings, bkashNumber: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              paymentSettings: { ...storeSettings.paymentSettings, bkashNumber: e.target.value }
                             })}
                           />
                         </div>
 
                         <div className="space-y-3">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Nagad Number</label>
-                          <input 
+                          <input
                             type="text"
-                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all" 
+                            className="w-full bg-white border border-outline-variant/10 rounded-xl py-4 px-4 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
                             value={storeSettings.paymentSettings.nagadNumber}
-                            onChange={(e) => updateStoreSettings({ 
-                              paymentSettings: { ...storeSettings.paymentSettings, nagadNumber: e.target.value } 
+                            onChange={(e) => updateStoreSettings({
+                              paymentSettings: { ...storeSettings.paymentSettings, nagadNumber: e.target.value }
                             })}
                           />
                         </div>
                       </div>
 
                       <div className="flex justify-end pt-4">
-                        <button 
-                          onClick={() => alert('Payment settings updated successfully!')}
+                        <button
+                          onClick={async () => {
+                            try {
+                              await refreshData();
+                              alert('Payment settings saved successfully!');
+                            } catch {
+                              alert('Payment settings were updated, but refresh failed.');
+                            }
+                          }}
                           className="flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-black/10 hover:scale-[1.02] transition-all active:scale-95"
                         >
                           <Save className="w-4 h-4" />
@@ -1109,31 +1135,6 @@ export default function AdminSettings() {
               )}
 
               {/* Placeholder for other tabs */}
-              {!['Home Page', 'General', 'Security', 'Payments'].includes(activeTab) && (
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                  <div className="w-16 h-16 bg-surface-low rounded-full flex items-center justify-center text-primary/40">
-                    {tabs.find(t => t.label === activeTab)?.icon && (
-                      <div className="w-8 h-8">
-                        {(() => {
-                          const Icon = tabs.find(t => t.label === activeTab)!.icon;
-                          return <Icon className="w-full h-full" />;
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-headline font-bold">{activeTab} Settings</h3>
-                    <p className="text-sm text-on-surface-variant max-w-xs mx-auto">Configure your {activeTab.toLowerCase()} preferences and policies.</p>
-                  </div>
-                  <button 
-                    onClick={() => alert(`${activeTab} settings saved!`)}
-                    className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save {activeTab} Settings
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>

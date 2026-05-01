@@ -10,8 +10,8 @@ interface CartItem extends Product {
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: Product, quantity: number, size?: string, color?: string) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, size?: string, color?: string) => void;
+  updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void;
   clearCart: () => void;
   subtotal: number;
   total: number;
@@ -26,15 +26,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (product: Product, quantity: number, size?: string, color?: string) => {
-    const existingItemIndex = cartItems.findIndex(item => 
-      item.id === product.id && 
-      item.selectedSize === size && 
+    const existingItemIndex = cartItems.findIndex(item =>
+      item.id === product.id &&
+      item.selectedSize === size &&
       item.selectedColor === color
     );
-    
+
     let newCart;
     if (existingItemIndex > -1) {
-      newCart = cartItems.map((item, index) => 
+      newCart = cartItems.map((item, index) =>
         index === existingItemIndex
           ? { ...item, quantity: item.quantity + quantity }
           : item
@@ -42,7 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } else {
       newCart = [...cartItems, { ...product, quantity, selectedSize: size, selectedColor: color }];
     }
-    
+
     setCartItems(newCart);
     const totalItems = newCart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -62,13 +62,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId));
+  const removeFromCart = (
+    productId: string,
+    size?: string,
+    color?: string
+  ) => {
+    setCartItems(prev => prev.filter(item =>
+      item.id !== productId || item.selectedSize !== size || item.selectedColor !== color
+    ));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    setCartItems(prev => prev.map(item => 
-      item.id === productId ? { ...item, quantity: Math.max(1, quantity) } : item
+  const updateQuantity = (
+    productId: string,
+    quantity: number,
+    size?: string,
+    color?: string
+  ) => {
+    setCartItems(prev => prev.map(item =>
+      item.id === productId && item.selectedSize === size && item.selectedColor === color
+        ? { ...item, quantity: Math.max(1, quantity) }
+        : item
     ));
   };
 
@@ -76,15 +89,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const shipping = cartItems.length > 0 ? 0 : 0; 
+  const shipping = cartItems.length > 0 ? 0 : 0;
   const total = subtotal + shipping;
 
   return (
-    <CartContext.Provider value={{ 
-      cartItems, 
-      addToCart, 
-      removeFromCart, 
-      updateQuantity, 
+    <CartContext.Provider value={{
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
       clearCart,
       subtotal,
       total,

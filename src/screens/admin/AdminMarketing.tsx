@@ -1,7 +1,7 @@
 import { AdminLayout } from './AdminDashboard';
 import { Ticket, Plus, Trash2, Save, Truck } from 'lucide-react';
 import { useProducts } from '../../context/ProductContext';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 
@@ -10,6 +10,11 @@ export default function AdminMarketing() {
   const [newCoupon, setNewCoupon] = useState({ code: '', discountPercent: '' });
   const [shippingChittagong, setShippingChittagong] = useState(storeSettings.shippingChittagong.toString());
   const [shippingOutside, setShippingOutside] = useState(storeSettings.shippingOutsideChittagong.toString());
+
+  useEffect(() => {
+    setShippingChittagong(storeSettings.shippingChittagong.toString());
+    setShippingOutside(storeSettings.shippingOutsideChittagong.toString());
+  }, [storeSettings.shippingChittagong, storeSettings.shippingOutsideChittagong]);
 
   const handleAddCoupon = (e: React.FormEvent) => {
     e.preventDefault();

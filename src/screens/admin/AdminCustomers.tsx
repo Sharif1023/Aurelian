@@ -1,22 +1,17 @@
 import { AdminLayout } from './AdminDashboard';
-import { Search, Filter, MoreVertical, Mail, Phone, MapPin } from 'lucide-react';
+import { Search, Mail, Phone, MoreVertical } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState } from 'react';
-
-const CUSTOMERS = [
-  { id: 'CUS-001', name: 'Elena Rossi', email: 'elena@example.com', phone: '+39 333 1234567', orders: 12, spent: '৳4,200.00', status: 'Active' },
-  { id: 'CUS-002', name: 'Marcus Vane', email: 'marcus@example.com', phone: '+44 20 7123 4567', orders: 8, spent: '৳2,850.00', status: 'Active' },
-  { id: 'CUS-003', name: 'Sofia K.', email: 'sofia@example.com', phone: '+33 1 23 45 67 89', orders: 5, spent: '৳1,185.00', status: 'Inactive' },
-  { id: 'CUS-004', name: 'Julian M.', email: 'julian@example.com', phone: '+49 30 123456', orders: 3, spent: '৳940.00', status: 'Active' },
-  { id: 'CUS-005', name: 'Isabella L.', email: 'isabella@example.com', phone: '+34 91 123 45 67', orders: 15, spent: '৳6,890.00', status: 'Active' },
-];
+import { useProducts } from '../../context/ProductContext';
 
 export default function AdminCustomers() {
+  const { customers } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredCustomers = CUSTOMERS.filter(customer => 
+  const filteredCustomers = customers.filter(customer => 
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+    customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.phone.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -28,7 +23,7 @@ export default function AdminCustomers() {
         </header>
 
         <div className="bg-white rounded-3xl shadow-sm border border-outline-variant/10 overflow-hidden">
-          <div className="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="p-6 border-b border-outline-variant/10">
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant/40" />
               <input
@@ -38,10 +33,6 @@ export default function AdminCustomers() {
                 placeholder="Search by name or email..."
               />
             </div>
-            <button className="flex items-center gap-2 px-6 py-3 bg-white border border-outline-variant/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-surface-low transition-colors">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -57,6 +48,13 @@ export default function AdminCustomers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/5">
+                {filteredCustomers.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-8 py-10 text-center text-sm text-on-surface-variant">
+                      No customers found yet. Customers are created automatically after checkout using email and phone.
+                    </td>
+                  </tr>
+                )}
                 {filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-surface-low/50 transition-colors group">
                     <td className="px-8 py-6">
@@ -82,8 +80,8 @@ export default function AdminCustomers() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-xs">{customer.orders} orders</td>
-                    <td className="px-8 py-6 font-headline font-bold text-sm">{customer.spent}</td>
+                    <td className="px-8 py-6 text-xs">{customer.totalOrders} orders</td>
+                    <td className="px-8 py-6 font-headline font-bold text-sm">৳{customer.totalSpent.toFixed(2)}</td>
                     <td className="px-8 py-6">
                       <span className={cn(
                         "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full",

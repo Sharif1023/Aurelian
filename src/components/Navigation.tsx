@@ -12,7 +12,7 @@ import {
   Facebook,
   Globe
 } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn, getAdminPath } from '@/src/lib/utils';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -30,7 +30,11 @@ export function Navbar() {
   const safeCategories = categories || [];
   const socialLinks = storeSettings?.socialLinks || [];
   const categorySubtitles = storeSettings?.categorySubtitles || {};
-  const brandSettings = storeSettings?.brandSettings || {};
+  const brandSettings = storeSettings?.brandSettings ?? {
+    name: 'AURELIAN',
+    fontFamily: 'font-display',
+    color: '#000000'
+  };
 
   // Close menu on route change
   useEffect(() => {
@@ -244,7 +248,11 @@ export function Footer() {
   const { storeSettings } = useProducts();
 
   const socialLinks = storeSettings?.socialLinks || [];
-  const brandSettings = storeSettings?.brandSettings || {};
+  const brandSettings = storeSettings?.brandSettings ?? {
+    name: 'AURELIAN',
+    fontFamily: 'font-display',
+    color: '#000000'
+  };
 
   return (
     <footer className="w-full pt-24 pb-32 bg-white text-primary flex flex-col items-center px-8 text-center relative border-t border-outline-variant/10">
@@ -253,10 +261,10 @@ export function Footer() {
           <div
             className={cn(
               'font-black text-4xl md:text-5xl uppercase tracking-[0.35em] md:tracking-[0.5em] leading-none mb-4',
-              brandSettings?.fontFamily || 'font-display'
+              brandSettings.fontFamily || 'font-display'
             )}
             style={{
-              color: brandSettings?.color || 'inherit'
+              color: brandSettings.color || 'inherit'
             }}
           >
             {BRAND_NAME}
@@ -374,7 +382,7 @@ export function Footer() {
         <p
           className={cn(
             'text-[9px] tracking-[0.4em] uppercase font-black',
-            brandSettings?.fontFamily || 'font-display'
+            brandSettings.fontFamily || 'font-display'
           )}
         >
           © 2026 {BRAND_NAME} LUXE. CURATED ELEGANCE.
@@ -388,7 +396,7 @@ export function MobileNav() {
   const location = useLocation();
   const { cartCount } = useCart();
 
-  const adminPath = localStorage.getItem('admin_path') || 'admin';
+  const adminPath = getAdminPath(location.pathname);
   const isAdmin = location.pathname.startsWith(`/${adminPath}`);
 
   if (isAdmin) return null;

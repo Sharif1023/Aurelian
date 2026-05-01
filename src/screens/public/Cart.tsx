@@ -25,7 +25,7 @@ export default function Cart() {
           <div className="lg:col-span-8 space-y-10">
             <AnimatePresence mode="popLayout">
               {cartItems.map((item) => (
-                <motion.div 
+                <motion.div
                   key={`${item.id}-${item.selectedSize}-${item.selectedColor}`}
                   layout
                   initial={{ opacity: 0, x: -20 }}
@@ -48,22 +48,22 @@ export default function Cart() {
                     </div>
                     <div className="flex justify-between items-center mt-6">
                       <div className="flex items-center bg-surface-low rounded-full px-4 py-2">
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedSize, item.selectedColor)}
                           className="hover:opacity-50 transition-opacity p-1"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
                         <span className="mx-6 font-medium w-4 text-center">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedSize, item.selectedColor)}
                           className="hover:opacity-50 transition-opacity p-1"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
-                      <button 
-                        onClick={() => removeFromCart(item.id)}
+                      <button
+                        onClick={() => removeFromCart(item.id, item.selectedSize, item.selectedColor)}
                         className="text-on-surface-variant hover:text-red-600 transition-colors p-2"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -118,7 +118,7 @@ export default function Cart() {
       ) : (
         <div className="py-32 text-center">
           <p className="text-on-surface-variant font-light italic mb-8">Your cart is currently empty.</p>
-          <Link 
+          <Link
             to="/collection"
             className="px-12 py-5 bg-primary text-white rounded-full font-bold uppercase tracking-[0.2em] shadow-lg hover:opacity-90 transition-opacity inline-block"
           >

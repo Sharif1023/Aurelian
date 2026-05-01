@@ -60,7 +60,7 @@ export default function Checkout() {
     cardCVC: ''
   });
 
-  const handleCompleteOrder = () => {
+  const handleCompleteOrder = async () => {
     if (!formData.fullName || !formData.address || !formData.phone || !formData.email) {
       alert('Please fill in all required contact and shipping details.');
       return;
@@ -74,7 +74,7 @@ export default function Checkout() {
     setIsProcessing(true);
 
     try {
-      const newOrder = createOrder({
+      const newOrder = await createOrder({
         customerName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -110,7 +110,12 @@ export default function Checkout() {
       // Removed automatic redirect to allow invoice download
     } catch (error) {
       setIsProcessing(false);
-      alert('Failed to place order. Please try again.');
+      console.error('Order submission failed:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to place order. Please try again.';
+      alert(message);
     }
   };
 

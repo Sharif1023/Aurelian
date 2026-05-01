@@ -31,62 +31,41 @@ Aurelian Luxe is a high-end, production-ready e-commerce platform designed for c
   - Manage bKash and Nagad numbers for payments.
   - Dynamically add and manage social media links.
 
-## 🗄️ Database Integration (XAMPP / MySQL)
+## 🗄️ Database & API (Local Hosting)
 
-This project currently uses `localStorage` for data persistence. To connect it to a real database using **XAMPP**, follow these steps:
+This project already includes a full backend in `backend/server.js` and uses MySQL for persistence.
 
-### 1. Setup XAMPP
-- Open **XAMPP Control Panel**.
-- Start **Apache** and **MySQL**.
-- Click the **Admin** button next to MySQL to open **phpMyAdmin**.
+### 1. Create and import the database
+- Create a MySQL database (for example: `sharuuco_test`).
+- Import `database_schema.sql` into that database using phpMyAdmin or MySQL CLI.
 
-### 2. Import Database Schema
-- In phpMyAdmin, create a new database named `aurelian_luxe`.
-- Click on the **Import** tab.
-- Choose the `database_schema.sql` file provided in the root of this project.
-- Click **Go** to create all tables and insert demo data.
+### 2. Configure backend environment
+- Copy `backend/.env.example` to `backend/.env`.
+- Set database credentials (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`).
+- Set a strong `JWT_SECRET`.
 
-### 3. Connect Frontend to Backend
-React cannot connect directly to MySQL for security reasons. You need a simple **Node.js/Express** backend.
+### 3. Configure frontend environment
+- Copy `.env.example` to `.env`.
+- For local development, keep:
+  - `VITE_API_URL=/api`
+  - `VITE_API_PROXY_TARGET=http://localhost:5000`
 
-#### Step A: Create a `server.js` file in your root folder:
-```javascript
-const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
+### 4. Start backend and frontend
+- Backend:
+  ```bash
+  cd backend
+  npm install
+  npm start
+  ```
+- Frontend (new terminal):
+  ```bash
+  npm install
+  npm run dev
+  ```
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '', // Default XAMPP password is empty
-  database: 'aurelian_luxe'
-});
-
-// Example API to get products
-app.get('/api/products', (req, res) => {
-  db.query('SELECT * FROM products', (err, results) => {
-    if (err) return res.status(500).send(err);
-    res.json(results);
-  });
-});
-
-app.listen(5000, () => console.log('Server running on port 5000'));
-```
-
-#### Step B: Update `src/context/ProductContext.tsx`
-Replace the `localStorage` logic with `fetch` calls to your new API:
-```typescript
-// Inside ProductProvider useEffect
-useEffect(() => {
-  fetch('http://localhost:5000/api/products')
-    .then(res => res.json())
-    .then(data => setProducts(data));
-}, []);
-```
+### 5. Verify connection
+- Backend health check: `http://localhost:5000/api/health`
+- Through frontend proxy: `http://localhost:3000/api/health`
 
 ## 🚀 Tech Stack
 

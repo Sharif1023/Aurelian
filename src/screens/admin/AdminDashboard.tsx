@@ -1,16 +1,17 @@
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut, TrendingUp, DollarSign, PackageCheck, AlertCircle, Menu, X, Plus, Ticket } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@/src/lib/utils';
+import { cn, getAdminPath } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { ReactNode, useState } from 'react';
 import { useProducts } from '../../context/ProductContext';
+import { logoutAdmin } from '../../lib/api';
 
 export function AdminLayout({ children }: { children: ReactNode }) {
   const { products, orders, storeSettings } = useProducts();
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const adminPath = localStorage.getItem('admin_path') || 'admin';
+  const adminPath = getAdminPath(location.pathname);
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Overview', path: `/${adminPath}` },
@@ -30,12 +31,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             "font-black text-xl tracking-[0.3em] uppercase",
             storeSettings.brandSettings?.fontFamily || 'font-display'
           )}
-          style={{ color: storeSettings.brandSettings?.color || 'inherit' }}
+            style={{ color: storeSettings.brandSettings?.color || 'inherit' }}
           >
             {storeSettings.brandSettings?.name || 'AURELIAN'}
           </h1>
         </Link>
-        <button 
+        <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="p-2 hover:bg-surface-low rounded-xl transition-colors"
         >
@@ -66,7 +67,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             "font-black text-2xl tracking-[0.3em] uppercase",
             storeSettings.brandSettings?.fontFamily || 'font-display'
           )}
-          style={{ color: storeSettings.brandSettings?.color || 'inherit' }}
+            style={{ color: storeSettings.brandSettings?.color || 'inherit' }}
           >
             {storeSettings.brandSettings?.name || 'AURELIAN'}
           </h1>
@@ -92,9 +93,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <button 
+        <button
           onClick={() => {
-            sessionStorage.removeItem('admin_authenticated');
+            logoutAdmin();
             navigate('/');
           }}
           className="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-red-50 hover:text-red-600 transition-all mt-auto"
@@ -130,7 +131,7 @@ export default function AdminDashboard() {
           <p className="text-sm text-on-surface-variant">Welcome back, Atelier Manager.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <button 
+          <button
             onClick={() => {
               const data = products.map(p => ({ name: p.name, stock: p.stock, price: p.price }));
               const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -144,8 +145,8 @@ export default function AdminDashboard() {
           >
             Export Report
           </button>
-          <button 
-            onClick={() => navigate(`/${localStorage.getItem('admin_path') || 'admin'}/products`)}
+          <button
+            onClick={() => navigate(`/${getAdminPath(location.pathname)}/products`)}
             className="bg-primary text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md flex items-center justify-center gap-2 hover:scale-105 transition-transform"
           >
             <Plus className="w-4 h-4" />
@@ -208,8 +209,8 @@ export default function AdminDashboard() {
                   <p className="text-xs font-bold">৳{order.total.toFixed(2)}</p>
                   <span className={cn(
                     "text-[10px] font-bold uppercase tracking-tighter",
-                    order.status === 'Delivered' ? "text-green-600" : 
-                    order.status === 'Pending' ? "text-amber-600" : "text-blue-600"
+                    order.status === 'Delivered' ? "text-green-600" :
+                      order.status === 'Pending' ? "text-amber-600" : "text-blue-600"
                   )}>{order.status}</span>
                 </div>
               </div>
@@ -218,8 +219,8 @@ export default function AdminDashboard() {
               <p className="text-xs text-on-surface-variant text-center py-8">No orders yet.</p>
             )}
           </div>
-          <button 
-            onClick={() => navigate(`/${localStorage.getItem('admin_path') || 'admin'}/orders`)}
+          <button
+            onClick={() => navigate(`/${getAdminPath(location.pathname)}/orders`)}
             className="w-full mt-8 py-4 border border-outline-variant/30 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-surface-low transition-colors"
           >
             View All Orders

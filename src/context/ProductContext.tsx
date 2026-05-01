@@ -6,10 +6,12 @@ import React, {
   useEffect,
   useCallback
 } from 'react';
-import { Product, Order, Coupon, PRODUCTS } from '../types';
+import { getAdminToken } from '../lib/api';
+import { Product, Order, Coupon, Customer, PRODUCTS } from '../types';
 
 const API_BASE_URL =
-  ((import.meta as any).env?.VITE_API_URL as string) || 'https://sharuu.com/backend/api';
+  ((import.meta as any).env?.VITE_API_URL as string) ||
+  '/api';
 
 export interface SocialLink {
   platform: string;
@@ -37,6 +39,13 @@ export interface StoreSettings {
     contactPhone?: string;
     shippingReturns?: string;
     specifications?: string;
+  };
+  generalSettings: {
+    storeName: string;
+    storeEmail: string;
+    storeDescription: string;
+    currency: string;
+    weightUnit: string;
   };
 }
 
@@ -83,9 +92,10 @@ interface ProductContextType {
   deleteCoupon: (id: string) => void;
 
   orders: Order[];
-  createOrder: (order: Omit<Order, 'id' | 'orderNumber' | 'status' | 'createdAt'>) => Order;
+  createOrder: (order: Omit<Order, 'id' | 'orderNumber' | 'status' | 'createdAt'>) => Promise<Order>;
   updateOrderStatus: (id: string, status: Order['status']) => void;
   deleteOrder: (id: string) => void;
+  customers: Customer[];
 
   wishlist: string[];
   toggleWishlist: (productId: string) => void;
@@ -132,6 +142,13 @@ const defaultStoreSettings: StoreSettings = {
     shippingReturns: 'Free shipping on orders over ৳100. Easy 30-day returns.',
     specifications:
       'Material: 100% Cotton/Leather. Care: Machine wash cold / Professional leather clean.'
+  },
+  generalSettings: {
+    storeName: 'Aurelian Luxe',
+    storeEmail: 'atelier@aurelian.com',
+    storeDescription: 'A global destination for curated luxury and timeless elegance.',
+    currency: 'BDT (৳)',
+    weightUnit: 'Kilograms (kg)'
   }
 };
 
@@ -190,14 +207,22 @@ const defaultHomeSettings: HomeSettings = {
 
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit & { auth?: boolean } = {}
 ): Promise<T> {
+  const token = getAdminToken();
+  const headers = new Headers(options.headers || {});
+
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (options.auth && token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    }
+    headers
   });
 
   if (!response.ok) {
@@ -220,23 +245,27 @@ async function apiRequest<T>(
   return response.json();
 }
 
-const apiGet = <T,>(endpoint: string) => apiRequest<T>(endpoint);
+const apiGet = <T,>(endpoint: string, auth = false) =>
+  apiRequest<T>(endpoint, { auth });
 
-const apiPost = <T,>(endpoint: string, data: unknown) =>
+const apiPost = <T,>(endpoint: string, data: unknown, auth = false) =>
   apiRequest<T>(endpoint, {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    auth
   });
 
-const apiPut = <T,>(endpoint: string, data: unknown) =>
+const apiPut = <T,>(endpoint: string, data: unknown, auth = true) =>
   apiRequest<T>(endpoint, {
     method: 'PUT',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    auth
   });
 
-const apiDelete = <T,>(endpoint: string) =>
+const apiDelete = <T,>(endpoint: string, auth = true) =>
   apiRequest<T>(endpoint, {
-    method: 'DELETE'
+    method: 'DELETE',
+    auth
   });
 
 function generateId() {
@@ -303,6 +332,18 @@ function mapDbCouponToCoupon(row: any): Coupon {
 }
 
 function mapDbOrderToOrder(row: any): Order {
+  const mappedItems = Array.isArray(row.items)
+    ? row.items.map((item: any) => ({
+        productId: String(item.product_id ?? item.productId ?? item.id ?? ''),
+        name: item.product_name ?? item.productName ?? item.name ?? '',
+        price: Number(item.price ?? 0),
+        quantity: Number(item.quantity ?? 0),
+        size: item.size ?? undefined,
+        color: item.color ?? undefined,
+        image: item.image_url ?? item.imageUrl ?? item.image ?? ''
+      }))
+    : [];
+
   return {
     id: String(row.id),
     orderNumber: row.order_number ?? row.orderNumber,
@@ -332,7 +373,7 @@ function mapDbOrderToOrder(row: any): Order {
     status: row.status ?? 'Pending',
     createdAt: row.created_at ?? row.createdAt ?? new Date().toISOString(),
     created_at: row.created_at ?? row.createdAt,
-    items: row.items ?? []
+    items: mappedItems
   } as Order;
 }
 
@@ -391,6 +432,10 @@ function mergeStoreSettings(
     categorySubtitles: {
       ...defaultStoreSettings.categorySubtitles,
       ...(apiSettings?.categorySubtitles || {})
+    },
+    generalSettings: {
+      ...defaultStoreSettings.generalSettings,
+      ...(apiSettings?.generalSettings || {})
     }
   };
 }
@@ -416,6 +461,7 @@ function mergeHomeSettings(apiSettings?: Partial<HomeSettings>): HomeSettings {
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [storeSettings, setStoreSettings] =
     useState<StoreSettings>(defaultStoreSettings);
   const [homeSettings, setHomeSettings] =
@@ -434,13 +480,16 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const [productsResult, ordersResult, storeSettingsResult, homeSettingsResult, couponsResult] =
+      const authOrders = Boolean(getAdminToken());
+      const authCoupons = Boolean(getAdminToken());
+      const [productsResult, ordersResult, customersResult, storeSettingsResult, homeSettingsResult, couponsResult] =
         await Promise.allSettled([
           apiGet<any[]>('/products'),
-          apiGet<any[]>('/orders'),
+          authOrders ? apiGet<any[]>('/orders', true) : Promise.resolve([]),
+          authOrders ? apiGet<Customer[]>('/customers', true) : Promise.resolve([]),
           apiGet<Partial<StoreSettings>>('/settings/store_settings'),
           apiGet<Partial<HomeSettings>>('/settings/home_settings'),
-          apiGet<any[]>('/coupons')
+          authCoupons ? apiGet<any[]>('/coupons', true) : Promise.resolve([])
         ]);
 
       if (productsResult.status === 'fulfilled') {
@@ -449,6 +498,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
       if (ordersResult.status === 'fulfilled') {
         setOrders(ordersResult.value.map(mapDbOrderToOrder));
+      }
+
+      if (customersResult.status === 'fulfilled') {
+        setCustomers(customersResult.value);
       }
 
       const apiCoupons =
@@ -469,6 +522,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       const failedResults = [
         productsResult,
         ordersResult,
+        customersResult,
         storeSettingsResult,
         homeSettingsResult,
         couponsResult
@@ -524,13 +578,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
       setStoreSettings(updatedStoreSettings);
 
-      void apiPut('/settings/store_settings', updatedStoreSettings).catch(error => {
+      void apiPut('/settings/store_settings', updatedStoreSettings, true).catch(error => {
         console.error('Failed to update category subtitles:', error);
         setError(getErrorMessage(error));
       });
     }
 
-    void apiPost<Product>('/products', toDbProductPayload(product))
+    void apiPost<Product>('/products', toDbProductPayload(product), true)
       .then(savedProduct => {
         if (savedProduct) {
           setProducts(prev =>
@@ -556,7 +610,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       )
     );
 
-    void apiPut<Product>(`/products/${id}`, toDbProductPayload(updatedFields))
+    void apiPut<Product>(`/products/${id}`, toDbProductPayload(updatedFields), true)
       .then(savedProduct => {
         if (savedProduct) {
           setProducts(prev =>
@@ -593,13 +647,14 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     setHomeSettings(updatedSettings);
 
-    void apiPut('/settings/home_settings', updatedSettings).catch(error => {
+    void apiPut('/settings/home_settings', updatedSettings, true).catch(error => {
       console.error('Failed to update home settings:', error);
       setError(getErrorMessage(error));
     });
   };
 
   const updateStoreSettings = (updatedFields: Partial<StoreSettings>) => {
+    const previousSettings = storeSettings;
     const updatedSettings = mergeStoreSettings({
       ...storeSettings,
       ...updatedFields
@@ -607,9 +662,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     setStoreSettings(updatedSettings);
 
-    void apiPut('/settings/store_settings', updatedSettings).catch(error => {
+    void apiPut('/settings/store_settings', updatedSettings, true).catch(error => {
       console.error('Failed to update store settings:', error);
       setError(getErrorMessage(error));
+      setStoreSettings(previousSettings);
     });
   };
 
@@ -624,7 +680,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       coupons: [coupon, ...prev.coupons]
     }));
 
-    void apiPost<Coupon>('/coupons', toDbCouponPayload(coupon))
+    void apiPost<Coupon>('/coupons', toDbCouponPayload(coupon), true)
       .then(savedCoupon => {
         if (savedCoupon) {
           const normalizedCoupon = mapDbCouponToCoupon(savedCoupon);
@@ -656,7 +712,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       coupons: prev.coupons.filter(coupon => coupon.id !== id)
     }));
 
-    void apiDelete(`/coupons/${id}`).catch(error => {
+    void apiDelete(`/coupons/${id}`, true).catch(error => {
       console.error('Failed to delete coupon:', error);
       setError(getErrorMessage(error));
 
@@ -667,9 +723,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const createOrder = (
+  const createOrder = async (
     newOrder: Omit<Order, 'id' | 'orderNumber' | 'status' | 'createdAt'>
   ) => {
+    if (!newOrder.items || newOrder.items.length === 0) {
+      throw new Error('Cannot create order with an empty cart.');
+    }
+
     const order: Order = {
       ...(newOrder as Order),
       id: generateId(),
@@ -680,22 +740,25 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     setOrders(prev => [order, ...prev]);
 
-    void apiPost<Order>('/orders', toDbOrderPayload(order))
-      .then(savedOrder => {
-        if (savedOrder) {
-          const normalizedOrder = mapDbOrderToOrder(savedOrder);
+    try {
+      const savedOrder = await apiPost<Order>('/orders', toDbOrderPayload(order));
+      if (savedOrder) {
+        const normalizedOrder = mapDbOrderToOrder(savedOrder);
 
-          setOrders(prev =>
-            prev.map(item => (item.id === order.id ? normalizedOrder : item))
-          );
-        }
-      })
-      .catch(error => {
-        console.error('Failed to create order:', error);
-        setError(getErrorMessage(error));
-      });
+        setOrders(prev =>
+          prev.map(item => (item.id === order.id ? normalizedOrder : item))
+        );
 
-    return order;
+        return normalizedOrder;
+      }
+
+      return order;
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      setError(getErrorMessage(error));
+      setOrders(prev => prev.filter(item => item.id !== order.id));
+      throw error;
+    }
   };
 
   const updateOrderStatus = (id: string, status: Order['status']) => {
@@ -766,6 +829,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         createOrder,
         updateOrderStatus,
         deleteOrder,
+        customers,
 
         wishlist,
         toggleWishlist,

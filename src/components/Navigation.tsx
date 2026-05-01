@@ -103,7 +103,7 @@ export function Navbar() {
               color: brandSettings?.color || 'var(--color-primary)'
             }}
           >
-            {BRAND_NAME}
+            {brandSettings?.name || BRAND_NAME}
           </Link>
 
           <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export function Navbar() {
                     color: brandSettings?.color || 'inherit'
                   }}
                 >
-                  {BRAND_NAME}
+                  {brandSettings?.name || BRAND_NAME}
                 </Link>
 
                 <button
@@ -233,7 +233,7 @@ export function Navbar() {
                 </div>
 
                 <span className="font-display font-black uppercase tracking-[0.2em] text-[10px] text-on-surface-variant/40">
-                  {BRAND_NAME} © 2026
+                  {brandSettings?.name || BRAND_NAME} © 2026
                 </span>
               </div>
             </motion.div>
@@ -267,7 +267,7 @@ export function Footer() {
               color: brandSettings.color || 'inherit'
             }}
           >
-            {BRAND_NAME}
+            {brandSettings?.name || BRAND_NAME}
           </div>
 
           <p className="text-on-surface-variant/70 text-sm max-w-sm font-medium leading-relaxed tracking-tight">
@@ -385,7 +385,7 @@ export function Footer() {
             brandSettings.fontFamily || 'font-display'
           )}
         >
-          © 2026 {BRAND_NAME} LUXE. CURATED ELEGANCE.
+          © 2026 {brandSettings?.name || BRAND_NAME} LUXE. CURATED ELEGANCE.
         </p>
       </div>
     </footer>

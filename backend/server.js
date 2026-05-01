@@ -248,12 +248,14 @@ function formatProductRow(row, extras = {}) {
     productDetails: row.product_details || "",
     sizeChart: sizeChart || undefined,
     extraImages: extras.extraImages || [],
+    showSizeSection: toBoolean(row.show_size_section ?? true),
 
     product_code: row.product_code,
     original_price: row.original_price,
     sub_category: row.sub_category,
     product_details: row.product_details,
     size_chart_json: sizeChart,
+    show_size_section: toBoolean(row.show_size_section ?? true),
 
     price: Number(row.price || 0),
     discount:
@@ -379,7 +381,11 @@ function normalizeProductBody(body, existing = null) {
 
     sizes: Array.isArray(rawSizes) ? rawSizes : undefined,
     colors: Array.isArray(rawColors) ? rawColors : undefined,
-    images: Array.isArray(rawImages) ? uniqueCleanArray(rawImages) : undefined
+    images: Array.isArray(rawImages) ? uniqueCleanArray(rawImages) : undefined,
+
+    show_size_section: toBoolean(
+      getBodyValue(body, existing, ["show_size_section", "showSizeSection"], "show_size_section", true)
+    )
   };
 }
 
@@ -1236,9 +1242,9 @@ app.post("/api/products", requireAuth, asyncHandler(async (req, res) => {
       INSERT INTO products (
         id, product_code, name, price, original_price, discount, category,
         sub_category, image, description, product_details, rating, reviews,
-        stock, status, size_chart_json
+        stock, status, size_chart_json, show_size_section
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         product.id,
@@ -1256,7 +1262,8 @@ app.post("/api/products", requireAuth, asyncHandler(async (req, res) => {
         product.reviews,
         product.stock,
         product.status,
-        product.size_chart_json
+        product.size_chart_json,
+        product.show_size_section
       ]
     );
 
@@ -1301,7 +1308,7 @@ app.put("/api/products/:id", requireAuth, asyncHandler(async (req, res) => {
         product_code = ?, name = ?, price = ?, original_price = ?, discount = ?,
         category = ?, sub_category = ?, image = ?, description = ?,
         product_details = ?, rating = ?, reviews = ?, stock = ?, status = ?,
-        size_chart_json = ?
+        size_chart_json = ?, show_size_section = ?
       WHERE id = ?
       `,
       [
@@ -1320,6 +1327,7 @@ app.put("/api/products/:id", requireAuth, asyncHandler(async (req, res) => {
         product.stock,
         product.status,
         product.size_chart_json,
+        product.show_size_section,
         id
       ]
     );

@@ -35,6 +35,7 @@ export default function ProductDetail() {
   const [isBuying, setIsBuying] = useState(false);
 
   const productAny = activeProduct as any;
+  const showSizeSection = productAny?.showSizeSection ?? true;
 
   const galleryImages = useMemo(() => {
     if (!activeProduct) return [];
@@ -69,11 +70,6 @@ export default function ProductDetail() {
           { size: 'L', isAvailable: true, quantity: 0 },
           { size: 'XL', isAvailable: true, quantity: 0 }
         ];
-
-  const availableColors =
-    productAny?.colors && productAny.colors.length > 0
-      ? productAny.colors
-      : [{ name: 'Default', hex: '#000000' }];
 
   const selectedSizeData = availableSizes.find(s => s.size === selectedSize);
 
@@ -154,7 +150,13 @@ export default function ProductDetail() {
     if (!activeProduct) return;
 
     setIsAdding(true);
-    addToCart(activeProduct, 1, selectedSize, selectedColor || 'Default');
+
+    addToCart(
+      activeProduct,
+      1,
+      showSizeSection ? selectedSize : '',
+      selectedColor || 'Default'
+    );
 
     setTimeout(() => {
       setIsAdding(false);
@@ -165,7 +167,14 @@ export default function ProductDetail() {
     if (!activeProduct) return;
 
     setIsBuying(true);
-    addToCart(activeProduct, 1, selectedSize, selectedColor || 'Default');
+
+    addToCart(
+      activeProduct,
+      1,
+      showSizeSection ? selectedSize : '',
+      selectedColor || 'Default'
+    );
+
     navigate('/checkout');
   };
 
@@ -196,13 +205,6 @@ export default function ProductDetail() {
                 No Image
               </div>
             )}
-             {/*
-            <div className="absolute top-6 left-6 pointer-events-none">
-              <span className="bg-white px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase text-primary shadow-sm rounded-full">
-                New Arrival
-              </span>
-            </div>
-            */}
           </div>
 
           {/* Thumbnails only */}
@@ -267,96 +269,50 @@ export default function ProductDetail() {
           </section>
 
           {/* Selectors */}
-          <div className="space-y-8">
-            <div>
-              <div className="flex justify-between items-end mb-4">
-                <label className="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant block">
-                  Size
-                </label>
-
-                {selectedSizeData && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                    {selectedSizeData.quantity} available
-                  </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                {availableSizes.map(s => (
-                  <button
-                    key={s.size}
-                    type="button"
-                    disabled={!s.isAvailable}
-                    onClick={() => setSelectedSize(s.size)}
-                    className={cn(
-                      'h-12 rounded-lg text-sm font-medium transition-all border relative overflow-hidden',
-                      selectedSize === s.size
-                        ? 'border-primary bg-primary text-white font-bold'
-                        : s.isAvailable
-                          ? 'border-outline-variant hover:border-primary'
-                          : 'border-outline-variant/10 bg-surface-low text-on-surface-variant/30 cursor-not-allowed'
-                    )}
-                  >
-                    {s.size}
-
-                    {!s.isAvailable && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-full h-[1px] bg-on-surface-variant/20 rotate-45" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/*}
-            {availableColors.length > 1 && (
+          {showSizeSection && (
+            <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-end mb-4">
                   <label className="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant block">
-                    Color
+                    Size
                   </label>
 
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                    {selectedColor}
-                  </span>
+                  {selectedSizeData && (
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                      {selectedSizeData.quantity} available
+                    </span>
+                  )}
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  {availableColors.map((color: any) => {
-                    const colorName = color.name || color.color || 'Default';
-                    const hex =
-                      color.hex || color.hexCode || color.hex_code || '#000000';
+                <div className="grid grid-cols-4 gap-2">
+                  {availableSizes.map(s => (
+                    <button
+                      key={s.size}
+                      type="button"
+                      disabled={!s.isAvailable}
+                      onClick={() => setSelectedSize(s.size)}
+                      className={cn(
+                        'h-12 rounded-lg text-sm font-medium transition-all border relative overflow-hidden',
+                        selectedSize === s.size
+                          ? 'border-primary bg-primary text-white font-bold'
+                          : s.isAvailable
+                            ? 'border-outline-variant hover:border-primary'
+                            : 'border-outline-variant/10 bg-surface-low text-on-surface-variant/30 cursor-not-allowed'
+                      )}
+                    >
+                      {s.size}
 
-                    return (
-                      <button
-                        key={colorName}
-                        type="button"
-                        onClick={() => setSelectedColor(colorName)}
-                        className={cn(
-                          'h-11 px-4 rounded-full border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all',
-                          selectedColor === colorName
-                            ? 'border-primary bg-primary text-white'
-                            : 'border-outline-variant hover:border-primary'
-                        )}
-                      >
-                        <span
-                          className="w-4 h-4 rounded-full border border-outline-variant/30"
-                          style={{ backgroundColor: hex }}
-                        />
-
-                        {colorName}
-                      </button>
-                    );
-                  })}
+                      {!s.isAvailable && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-full h-[1px] bg-on-surface-variant/20 rotate-45" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
-
-            */}
-
-
-          </div>
+            </div>
+          )}
 
           {/* CTAs */}
           <div className="space-y-4">

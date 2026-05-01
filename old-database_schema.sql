@@ -43,7 +43,6 @@ CREATE TABLE products (
     reviews INT DEFAULT 0,
     stock INT DEFAULT 0,
     status ENUM('Active', 'Draft', 'Archived') DEFAULT 'Active',
-    show_size_section BOOLEAN DEFAULT TRUE,
     size_chart_json JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -239,7 +238,6 @@ INSERT INTO products (
     reviews,
     stock,
     status,
-    show_size_section,
     size_chart_json
 ) VALUES
 (
@@ -258,7 +256,6 @@ INSERT INTO products (
     124,
     42,
     'Active',
-    TRUE,
     '{
       "title": "Shirt Size Chart",
       "columns": ["Size", "Chest", "Length", "Sleeve", "Collar"],
@@ -286,7 +283,6 @@ INSERT INTO products (
     89,
     15,
     'Active',
-    TRUE,
     '{
       "title": "T-Shirt Size Chart",
       "columns": ["Size", "Chest", "Length", "Shoulder"],
@@ -313,7 +309,6 @@ INSERT INTO products (
     56,
     28,
     'Active',
-    TRUE,
     '{
       "title": "Pant Size Chart",
       "columns": ["Size", "Waist", "Length", "Hip"],
@@ -341,7 +336,6 @@ INSERT INTO products (
     42,
     8,
     'Active',
-    TRUE,
     '{
       "title": "Shoe Size Chart",
       "columns": ["Size", "UK", "EU", "Foot Length"],
@@ -369,7 +363,6 @@ INSERT INTO products (
     210,
     12,
     'Active',
-    TRUE,
     '{
       "title": "Belt Size Chart",
       "columns": ["Size", "Waist Fit", "Total Length"],
@@ -651,6 +644,22 @@ SELECT COUNT(*) AS total_admin_users FROM admin_users;
 SELECT
     id,
     name,
-    show_size_section,
     JSON_UNQUOTE(JSON_EXTRACT(size_chart_json, '$.title')) AS size_chart_title
 FROM products;
+
+
+
+--==========================================================
+-- then
+
+-- Add show_size_section column to products table if it doesn't exist
+ALTER TABLE products 
+ADD COLUMN IF NOT EXISTS show_size_section BOOLEAN DEFAULT TRUE;
+
+-- Update existing products to have show_size_section = TRUE if the column was just added
+UPDATE products 
+SET show_size_section = TRUE 
+WHERE show_size_section IS NULL;
+
+
+-- main schema te add kora ache.

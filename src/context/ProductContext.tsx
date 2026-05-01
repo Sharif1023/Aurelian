@@ -10,8 +10,7 @@ import { getAdminToken } from '../lib/api';
 import { Product, Order, Coupon, Customer, PRODUCTS } from '../types';
 
 const API_BASE_URL =
-  ((import.meta as any).env?.VITE_API_URL as string) ||
-  '/api';
+  ((import.meta as any).env?.VITE_API_URL as string) || '/api';
 
 export interface SocialLink {
   platform: string;
@@ -77,7 +76,9 @@ export interface HomeSettings {
 
 interface ProductContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviews' | 'createdAt'>) => void;
+  addProduct: (
+    product: Omit<Product, 'id' | 'rating' | 'reviews' | 'createdAt'>
+  ) => void;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   categories: string[];
@@ -92,7 +93,9 @@ interface ProductContextType {
   deleteCoupon: (id: string) => void;
 
   orders: Order[];
-  createOrder: (order: Omit<Order, 'id' | 'orderNumber' | 'status' | 'createdAt'>) => Promise<Order>;
+  createOrder: (
+    order: Omit<Order, 'id' | 'orderNumber' | 'status' | 'createdAt'>
+  ) => Promise<Order>;
   updateOrderStatus: (id: string, status: Order['status']) => void;
   deleteOrder: (id: string) => void;
   customers: Customer[];
@@ -146,7 +149,8 @@ const defaultStoreSettings: StoreSettings = {
   generalSettings: {
     storeName: 'Aurelian Luxe',
     storeEmail: 'atelier@aurelian.com',
-    storeDescription: 'A global destination for curated luxury and timeless elegance.',
+    storeDescription:
+      'A global destination for curated luxury and timeless elegance.',
     currency: 'BDT (৳)',
     weightUnit: 'Kilograms (kg)'
   }
@@ -280,7 +284,36 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong';
 }
 
+function getBooleanWithDefault(value: unknown, fallback = true) {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
+
+  if (typeof value === 'string') {
+    const normalized = value.toLowerCase().trim();
+
+    if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+      return true;
+    }
+
+    if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+      return false;
+    }
+  }
+
+  return Boolean(value);
+}
+
+function productResponseHasShowSizeSection(row: any) {
+  return row?.show_size_section !== undefined || row?.showSizeSection !== undefined;
+}
+
 function mapDbProductToProduct(row: any): Product {
+  const showSizeSection = getBooleanWithDefault(
+    row.show_size_section ?? row.showSizeSection,
+    true
+  );
+
   return {
     id: String(row.id),
     productCode: row.product_code ?? row.productCode,
@@ -304,6 +337,7 @@ function mapDbProductToProduct(row: any): Product {
     sub_category: row.sub_category ?? row.subCategory,
     image: row.image ?? '',
     images: row.images ?? row.extraImages ?? [],
+    extraImages: row.extra_images ?? row.extraImages ?? row.images ?? [],
     description: row.description ?? '',
     productDetails: row.product_details ?? row.productDetails ?? '',
     product_details: row.product_details ?? row.productDetails ?? '',
@@ -311,6 +345,8 @@ function mapDbProductToProduct(row: any): Product {
     reviews: Number(row.reviews ?? 0),
     stock: Number(row.stock ?? 0),
     status: row.status ?? 'Active',
+    showSizeSection,
+    show_size_section: showSizeSection,
     sizes: row.sizes ?? [],
     colors: row.colors ?? [],
     sizeChart: row.size_chart_json ?? row.sizeChart,
@@ -384,7 +420,9 @@ function toDbProductPayload(product: Partial<Product> & Record<string, any>) {
     original_price: product.original_price ?? product.originalPrice,
     sub_category: product.sub_category ?? product.subCategory,
     product_details: product.product_details ?? product.productDetails,
-    size_chart_json: product.size_chart_json ?? product.sizeChart
+    size_chart_json: product.size_chart_json ?? product.sizeChart,
+    show_size_section: product.show_size_section ?? product.showSizeSection,
+    extra_images: product.extra_images ?? product.extraImages
   };
 }
 
@@ -482,15 +520,24 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     try {
       const authOrders = Boolean(getAdminToken());
       const authCoupons = Boolean(getAdminToken());
-      const [productsResult, ordersResult, customersResult, storeSettingsResult, homeSettingsResult, couponsResult] =
-        await Promise.allSettled([
-          apiGet<any[]>('/products'),
-          authOrders ? apiGet<any[]>('/orders', true) : Promise.resolve([]),
-          authOrders ? apiGet<Customer[]>('/customers', true) : Promise.resolve([]),
-          apiGet<Partial<StoreSettings>>('/settings/store_settings'),
-          apiGet<Partial<HomeSettings>>('/settings/home_settings'),
-          authCoupons ? apiGet<any[]>('/coupons', true) : Promise.resolve([])
-        ]);
+
+      const [
+        productsResult,
+        ordersResult,
+        customersResult,
+        storeSettingsResult,
+        homeSettingsResult,
+        couponsResult
+      ] = await Promise.allSettled([
+        apiGet<any[]>('/products'),
+        authOrders ? apiGet<any[]>('/orders', true) : Promise.resolve([]),
+        authOrders
+          ? apiGet<Customer[]>('/customers', true)
+          : Promise.resolve([]),
+        apiGet<Partial<StoreSettings>>('/settings/store_settings'),
+        apiGet<Partial<HomeSettings>>('/settings/home_settings'),
+        authCoupons ? apiGet<any[]>('/coupons', true) : Promise.resolve([])
+      ]);
 
       if (productsResult.status === 'fulfilled') {
         setProducts(productsResult.value.map(mapDbProductToProduct));
@@ -510,7 +557,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
           : undefined;
 
       if (storeSettingsResult.status === 'fulfilled') {
-        setStoreSettings(mergeStoreSettings(storeSettingsResult.value, apiCoupons));
+        setStoreSettings(
+          mergeStoreSettings(storeSettingsResult.value, apiCoupons)
+        );
       } else if (apiCoupons) {
         setStoreSettings(mergeStoreSettings(undefined, apiCoupons));
       }
@@ -560,6 +609,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       id: generateId(),
       rating: 5,
       reviews: 0,
+      showSizeSection: (newProduct as Product).showSizeSection ?? true,
       createdAt: new Date().toISOString()
     } as Product;
 
@@ -578,19 +628,29 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
       setStoreSettings(updatedStoreSettings);
 
-      void apiPut('/settings/store_settings', updatedStoreSettings, true).catch(error => {
-        console.error('Failed to update category subtitles:', error);
-        setError(getErrorMessage(error));
-      });
+      void apiPut('/settings/store_settings', updatedStoreSettings, true).catch(
+        error => {
+          console.error('Failed to update category subtitles:', error);
+          setError(getErrorMessage(error));
+        }
+      );
     }
 
     void apiPost<Product>('/products', toDbProductPayload(product), true)
       .then(savedProduct => {
         if (savedProduct) {
+          const normalizedProduct = mapDbProductToProduct(savedProduct);
+
+          const safeProduct = productResponseHasShowSizeSection(savedProduct)
+            ? normalizedProduct
+            : ({
+                ...normalizedProduct,
+                showSizeSection: product.showSizeSection ?? true,
+                show_size_section: product.showSizeSection ?? true
+              } as Product);
+
           setProducts(prev =>
-            prev.map(item =>
-              item.id === product.id ? mapDbProductToProduct(savedProduct) : item
-            )
+            prev.map(item => (item.id === product.id ? safeProduct : item))
           );
         }
       })
@@ -604,19 +664,47 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const updateProduct = (id: string, updatedFields: Partial<Product>) => {
     const previousProducts = products;
 
+    const previousProduct = previousProducts.find(product => product.id === id);
+
+    const fallbackShowSizeSection =
+      updatedFields.showSizeSection !== undefined
+        ? updatedFields.showSizeSection
+        : previousProduct?.showSizeSection ?? true;
+
     setProducts(prev =>
       prev.map(product =>
-        product.id === id ? ({ ...product, ...updatedFields } as Product) : product
+        product.id === id
+          ? ({
+              ...product,
+              ...updatedFields,
+              showSizeSection: fallbackShowSizeSection
+            } as Product)
+          : product
       )
     );
 
-    void apiPut<Product>(`/products/${id}`, toDbProductPayload(updatedFields), true)
+    void apiPut<Product>(
+      `/products/${id}`,
+      toDbProductPayload({
+        ...updatedFields,
+        showSizeSection: fallbackShowSizeSection
+      }),
+      true
+    )
       .then(savedProduct => {
         if (savedProduct) {
+          const normalizedProduct = mapDbProductToProduct(savedProduct);
+
+          const safeProduct = productResponseHasShowSizeSection(savedProduct)
+            ? normalizedProduct
+            : ({
+                ...normalizedProduct,
+                showSizeSection: fallbackShowSizeSection,
+                show_size_section: fallbackShowSizeSection
+              } as Product);
+
           setProducts(prev =>
-            prev.map(item =>
-              item.id === id ? mapDbProductToProduct(savedProduct) : item
-            )
+            prev.map(item => (item.id === id ? safeProduct : item))
           );
         }
       })
@@ -647,10 +735,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     setHomeSettings(updatedSettings);
 
-    void apiPut('/settings/home_settings', updatedSettings, true).catch(error => {
-      console.error('Failed to update home settings:', error);
-      setError(getErrorMessage(error));
-    });
+    void apiPut('/settings/home_settings', updatedSettings, true).catch(
+      error => {
+        console.error('Failed to update home settings:', error);
+        setError(getErrorMessage(error));
+      }
+    );
   };
 
   const updateStoreSettings = (updatedFields: Partial<StoreSettings>) => {
@@ -662,11 +752,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     setStoreSettings(updatedSettings);
 
-    void apiPut('/settings/store_settings', updatedSettings, true).catch(error => {
-      console.error('Failed to update store settings:', error);
-      setError(getErrorMessage(error));
-      setStoreSettings(previousSettings);
-    });
+    void apiPut('/settings/store_settings', updatedSettings, true).catch(
+      error => {
+        console.error('Failed to update store settings:', error);
+        setError(getErrorMessage(error));
+        setStoreSettings(previousSettings);
+      }
+    );
   };
 
   const addCoupon = (newCoupon: Omit<Coupon, 'id'>) => {
@@ -741,7 +833,11 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     setOrders(prev => [order, ...prev]);
 
     try {
-      const savedOrder = await apiPost<Order>('/orders', toDbOrderPayload(order));
+      const savedOrder = await apiPost<Order>(
+        '/orders',
+        toDbOrderPayload(order)
+      );
+
       if (savedOrder) {
         const normalizedOrder = mapDbOrderToOrder(savedOrder);
 
@@ -765,7 +861,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     const previousOrders = orders;
 
     setOrders(prev =>
-      prev.map(order => (order.id === id ? ({ ...order, status } as Order) : order))
+      prev.map(order =>
+        order.id === id ? ({ ...order, status } as Order) : order
+      )
     );
 
     void apiPut<Order>(`/orders/${id}/status`, { status })

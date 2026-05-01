@@ -42,6 +42,7 @@ export default function AdminProducts() {
     productDetails: '',
     stock: '0',
     status: 'Active' as Product['status'],
+    showSizeSection: true,
     sizes: [] as { size: string; isAvailable: boolean; quantity: number }[],
     sizeChart: {
       title: '',
@@ -62,7 +63,10 @@ export default function AdminProducts() {
     return matchesSearch && matchesCategory;
   });
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / itemsPerPage)
+  );
 
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
@@ -132,6 +136,7 @@ export default function AdminProducts() {
         productDetails: product.productDetails || '',
         stock: product.stock.toString(),
         status: product.status,
+        showSizeSection: productAny.showSizeSection ?? true,
         sizes: product.sizes || [],
         sizeChart: product.sizeChart || {
           title: '',
@@ -158,6 +163,7 @@ export default function AdminProducts() {
         productDetails: '',
         stock: '0',
         status: 'Active',
+        showSizeSection: true,
         sizes: getDefaultSizesForCategory(defaultCategory),
         sizeChart: {
           title: '',
@@ -265,6 +271,7 @@ export default function AdminProducts() {
       productDetails: formData.productDetails || undefined,
       stock: parseInt(formData.stock),
       status: formData.status,
+      showSizeSection: formData.showSizeSection,
       sizes: formData.sizes,
       sizeChart: hasSizeChart ? formData.sizeChart : undefined
     };
@@ -751,7 +758,7 @@ export default function AdminProducts() {
 
         <div className="px-8 py-6 bg-surface-low/30 flex justify-between items-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-            Page {currentPage} of {totalPages || 1}
+            Page {currentPage} of {totalPages}
           </p>
 
           <div className="flex gap-2">
@@ -765,7 +772,7 @@ export default function AdminProducts() {
 
             <button
               onClick={() =>
-                setCurrentPage(prev => Math.min(totalPages || 1, prev + 1))
+                setCurrentPage(prev => Math.min(totalPages, prev + 1))
               }
               disabled={currentPage >= totalPages}
               className="px-4 py-2 bg-white border border-outline-variant/20 rounded-lg text-[10px] font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-surface-low transition-colors"
@@ -1183,6 +1190,49 @@ export default function AdminProducts() {
                         No extra images added yet.
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Product Page Display */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                    Product Page Display
+                  </label>
+
+                  <div className="flex items-center justify-between gap-4 bg-surface-low rounded-2xl px-6 py-4 border border-outline-variant/10">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                        Show Size Section
+                      </p>
+
+                      <p className="text-[10px] text-on-surface-variant/60 mt-1">
+                        Turn this off to hide the size selector on the product
+                        detail page.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData(prev => ({
+                          ...prev,
+                          showSizeSection: !prev.showSizeSection
+                        }))
+                      }
+                      className={cn(
+                        'w-14 h-8 rounded-full p-1 transition-colors flex-shrink-0',
+                        formData.showSizeSection
+                          ? 'bg-primary'
+                          : 'bg-on-surface-variant/20'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'block w-6 h-6 bg-white rounded-full transition-transform',
+                          formData.showSizeSection && 'translate-x-6'
+                        )}
+                      />
+                    </button>
                   </div>
                 </div>
 
